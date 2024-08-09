@@ -1,17 +1,35 @@
+/*
+CAN Message Decode
+    CAN ID:
+    **** Typ Err Cmd Sou Des 
+    bits 2   3   8   8   8
+*/
+
 const can = require('socketcan');
 const channel = can.createRawChannel('can0', true);
 
-
-
-
+const canCmdTyp = {
+    'a' :    '0b0',
+    'b' :    '0b1'
+    }
+const canErr = {
+    'normal':   '0b000',
+    'okay'  :   '0b001',
+    'busy'  :   '0b010',
+    'invalcmd': '0b011',
+    'invaldat': '0b100'
+    }
 const canCmd = {
-    'a': '0b0',
-    'b': '0b1'}
-
-
-
-const canErrorNormal = '0b000';
-const canErrorOkey   = '0b001';
+    0   : '0x00',
+    1   : '0x01',
+    2   : '0x02',
+    3   : '0x03',
+    4   : '0x04',
+    5   : '0x05',
+    6   : '0x06',
+    7   : '0x07',
+    8   : '0x08',
+    }
 
 
 const message = {
@@ -21,7 +39,7 @@ const message = {
   timestamp: Date.now() // Optional: current timestamp
 };
 
-class CAN{
+class CAN{ 
     constructor(){
         this.a = 0;
         this.start();
@@ -29,9 +47,8 @@ class CAN{
         
     /*Basic fucntions */
     send(){
-        const identifier = this.assembleID();
-        const data = this.assembleData();
-        channel.send(Buffer.concat([identifier,data]));
+        //channel.send(Buffer.concat([this.assembleID(),this.assembleData()]));
+        channel.send(message);
         console.log('Message sent:', message);
         }
     
@@ -53,16 +70,17 @@ class CAN{
     /*Internal Functions*/
     assembleID(){
         var buf = Buffer.alloc(4);
-        
+        buf = Buffer.from([0x01,0x02,0x03,0x04]);
         return buf;
         }
     
-    /*
+    
     assembleData(){
-        var buf = Buffer.alloc()
-        
+        var buf = Buffer.alloc(4)
+        buf = Buffer.from([0x05,0x06,0x07,0x08]);
         return buf;
-        }*/
+        }
+        
     print(msg){
         console.log(msg,canCmd['c']);
         }

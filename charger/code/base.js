@@ -1,8 +1,8 @@
-const { CAN } = require('./can.js');
+const { CAN } = require('./lib/can.js');
 const can = new CAN();
 
 function dothis(){
-    can.print("aa");
+    can.send();
     }
     
 dothis()
