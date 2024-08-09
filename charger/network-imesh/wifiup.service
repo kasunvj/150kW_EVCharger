@@ -1,0 +1,16 @@
+[Unit]
+Description=WPA supplicant daemon (interface-specific version)
+#Requires=sys-subsystem-net-devices-wlan0.device
+#After=sys-subsystem-net-devices-wlan0.device
+After=network.target network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/home/linaro/wifiStart.sh
+User=root
+Group=root
+Type=forking
+
+[Install]
+WantedBy=multi-user.target

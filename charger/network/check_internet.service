@@ -1,0 +1,12 @@
+[Unit]
+Description=Check Internet Connectivity and Restart wifiup if needed
+After=wifiup.service
+
+[Service]
+ExecStart=/home/linaro/charger/network/wificheck.sh
+Restart=always
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target
