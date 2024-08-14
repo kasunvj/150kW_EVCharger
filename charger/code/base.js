@@ -19,9 +19,10 @@ var cancomm = {
     }
 
 function dothis(){
-    can.createMachines(1,1,1,1,1);
+    can.walk();
     console.log(can.netcontrollers);
-    can.send();
+    
+    can.send('nc','brd','res','invaldat',1,1);
     }
     
 dothis()
@@ -33,4 +34,7 @@ const gracefulkill = () => {
 process.on('SIGINT', gracefulkill);
 //process.on('SIGTERM', gracefulkill);
 //process.on('exit', gracefulkill);
+
+
+
 

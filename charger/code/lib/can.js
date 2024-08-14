@@ -78,12 +78,13 @@ CAN Data interpretation
  * */
 
 
+const { cpSync } = require('fs');
 const can = require('socketcan');
 const channel = can.createRawChannel('can0', true);
 
 const canCmdTyp = {
-    'req' :    0b0,
-    'res' :    0b1}
+    'req' :    0b00,
+    'res' :    0b01}
     
 const canErr = {
     'normal':   0b000,
@@ -119,13 +120,26 @@ const PCState  = {
     }
     
 
+const sysInfo = {
+    post : 0b01,
+    nboard : 0b001,
+    }
+
+const protocolInfo = {
+    post_bits: 2,
+    nboard_bits:3,
+    iderrorcode_bits:3,
+    idcommand_bits:8,
+    idsrcadd_bits:8,
+    iddestadd_bits : 8
+    }
+    
 
 
-
-const message = {
+var message = {
   id: 0x123, // CAN ID
   data: Buffer.from([0x04, 0xd2, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06]), // Data payload
-  ext: false, // Standard CAN ID (11-bit), set to true if using extended (29-bit) IDs
+  ext: true, // Standard CAN ID (11-bit), set to true if using extended (29-bit) IDs
   timestamp: Date.now() // Optional: current timestamp
 };
 
@@ -141,66 +155,20 @@ class CAN{
         }
         
     /*Basic fucntions that can access from base program*/
-    send(cmdtype,canerr,cancmd,srcaddr,desaddr){
-        //channel.send(Buffer.concat([this.assembleID(),this.assembleData()]));
+    send(srcaddr,desaddr,cmdtype,canerr,cancmd,candata){
+        
+        //message.id =this.assembleID(srcaddr,desaddr,cmdtype,canerr,cancmd);
+        message.id = '0x'+ this.assembleID(srcaddr,desaddr,cmdtype,canerr,cancmd).toString('hex');
+        message.data = this.assembleData(candata);
+        
         channel.send(message);
         console.log('Message sent:', message);
         }
-        
-        
-    createMachines(ncCount,pcCount,ccCount,tmcCount,ecCount){
-        
-        for (let i = 0; i < ncCount; i++) {
-            let obj = {
-                id: i + 1,
-                name: `Object${i + 1}`,
-                timestamp: new Date().toISOString()
-            };
+    
+    walk(){
+        this.send('nc','brd','req','normal',1,1);
 
-            this.netcontrollers.push(obj);
-        }
-        
-        for (let i = 0; i < pcCount; i++) {
-            let obj = {
-                id: i + 1,
-                name: `Object${i + 1}`,
-                timestamp: new Date().toISOString()
-            };
-
-            this.portcontrollers.push(obj);
-        }
-        
-        for (let i = 0; i < ccCount; i++) {
-            let obj = {
-                id: i + 1,
-                name: `Object${i + 1}`,
-                timestamp: new Date().toISOString()
-            };
-
-            this.cabinetcontrollers.push(obj);
-        }
-        
-        for (let i = 0; i < tmcCount; i++) {
-            let obj = {
-                id: i + 1,
-                name: `Object${i + 1}`,
-                timestamp: new Date().toISOString()
-            };
-
-            this.themalcontrollers.push(obj);
-        }
-        
-        for (let i = 0; i < ecCount; i++) {
-            let obj = {
-                id: i + 1,
-                name: `Object${i + 1}`,
-                timestamp: new Date().toISOString()
-            };
-
-            this.envcontrollers.push(obj);
-        }
     }
-        
     
     
     start(){
@@ -208,6 +176,7 @@ class CAN{
         console.log('CAN channel started.');
         channel.addListener('onMessage', (msg) => {
               console.log('Message received:', msg);
+              this.decode(msg);
             });
         }
         
@@ -217,17 +186,89 @@ class CAN{
         } 
         
     /*Internal Functions*/
-    assembleID(){
-        var buf = Buffer.alloc(4);
-        buf = Buffer.from([0x01,0x02,0x03,0x04]);
+    assembleID(src,des,cmdtype,canerr,cancmd){
+        const source = ((board[src] << protocolInfo.post_bits | sysInfo.post ) << protocolInfo.nboard_bits) | sysInfo.nboard;
+        const destination = ((board[des] << protocolInfo.post_bits | sysInfo.post ) << protocolInfo.nboard_bits) | sysInfo.nboard;
+        const cmdtypeAndErr = canCmdTyp[cmdtype] << protocolInfo.iderrorcode_bits | canErr[canerr];
+        
+        console.log()
+        
+        var buf = Buffer.from([cmdtypeAndErr,canCmd[cancmd],source,destination]);
+        console.log("Buffer: ",buf);
+        return buf;
+        }
+
+    assembleData(option){
+        var buf = Buffer.alloc(4)
+        buf = Buffer.from([0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07]);
         return buf;
         }
     
+    decode(msg){
+
+        var inIdBuf = Buffer.alloc(4);
+        inIdBuf = Buffer.from(msg.id.toString(16).padStart(8,'0'),'hex');
+        const inDataBuf = msg.data;
+        
+        console.log("id: ",inIdBuf);
+        console.log("data: ",inDataBuf);
+
+        console.log();
+
+        
+    }
     
-    assembleData(){
-        var buf = Buffer.alloc(4)
-        buf = Buffer.from([0x05,0x06,0x07,0x08]);
-        return buf;
+    createMachines(ncCount,pcCount,ccCount,tmcCount,ecCount){
+    
+        for (let i = 0; i < ncCount; i++) {
+            let obj = {
+                id: i + 1,
+                name: `Network Controller ${i + 1}`,
+                timestamp: new Date().toISOString()
+            };
+
+            this.netcontrollers.push(obj);
+        }
+        
+        for (let i = 0; i < pcCount; i++) {
+            let obj = {
+                id: i + 1,
+                name: `Port Controller ${i + 1}`,
+                timestamp: new Date().toISOString()
+            };
+
+            this.portcontrollers.push(obj);
+        }
+        
+        for (let i = 0; i < ccCount; i++) {
+            let obj = {
+                id: i + 1,
+                name: `Cabin Controller ${i + 1}`,
+                timestamp: new Date().toISOString()
+            };
+
+            this.cabinetcontrollers.push(obj); 
+        }
+        
+        for (let i = 0; i < tmcCount; i++) {
+            let obj = {
+                id: i + 1,
+                name: `Thermal Controller ${i + 1}`,
+                timestamp: new Date().toISOString()
+            };
+
+            this.themalcontrollers.push(obj);
+        }
+        
+        for (let i = 0; i < ecCount; i++) {
+            let obj = {
+                id: i + 1,
+                name: `Environment Controller ${i + 1}`,
+                timestamp: new Date().toISOString()
+            };
+
+            this.envcontrollers.push(obj);
+        }
         }
         
     print(msg){
