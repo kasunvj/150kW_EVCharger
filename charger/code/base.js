@@ -6,9 +6,9 @@ const can = new CAN();
  * cancomm
  *  commandType :  'req','res' 
  *  canError    :  'normal','okay','busy','invalcmd','invaldat'
- *  canCommand  :   1,2,3,4,5,6,7,8
- *  canSource   :  'pc','cc','nc','tmc','esc','brd'
- *  canDestin   :  'pc','cc','nc','tmc','esc','brd'
+ *  canCommand  :   0,1,2,3,4,5,6,7,8
+ *  canSource   :  'pc_','cc_','nc_','tmc','esc','brd'
+ *  canDestin   :  'pc_','cc_','nc_','tmc','esc','brd'
  * 
 */
 
@@ -22,7 +22,7 @@ function dothis(){
     can.walk();
     console.log(can.netcontrollers);
     
-    can.send('nc','brd','res','invaldat',1,1);
+    //can.send('nc_','brd_','res_','invaldat',1,1);
     }
     
 dothis()

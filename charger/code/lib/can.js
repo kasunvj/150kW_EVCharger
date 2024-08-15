@@ -105,9 +105,9 @@ const canCmd = {
     8   : 0x08}
     
 const board = {
-    'pc': 0b000,
-    'cc': 0b001,
-    'nc': 0b010,
+    'pc_': 0b000,
+    'cc_': 0b001,
+    'nc_': 0b010,
     'tmc':0b011,
     'esc':0b100,
     'brd':0b111
@@ -133,7 +133,16 @@ const protocolInfo = {
     idsrcadd_bits:8,
     iddestadd_bits : 8
     }
-    
+
+class ControllerID{
+    constructor(){
+        this.board = '';
+        this.post ='';
+        this.boardNo = '';
+        this.name = '';
+        }
+    }
+
 
 
 var message = {
@@ -166,7 +175,8 @@ class CAN{
         }
     
     walk(){
-        this.send('nc','brd','req','normal',1,1);
+        //this.send('nc','brd','req','normal',0,0);
+        this.send('pc_','nc_','res','normal',0,0);
 
     }
     
@@ -175,7 +185,7 @@ class CAN{
         channel.start();
         console.log('CAN channel started.');
         channel.addListener('onMessage', (msg) => {
-              console.log('Message received:', msg);
+              //console.log('Message received:', msg);
               this.decode(msg);
             });
         }
@@ -209,12 +219,40 @@ class CAN{
         var inIdBuf = Buffer.alloc(4);
         inIdBuf = Buffer.from(msg.id.toString(16).padStart(8,'0'),'hex');
         const inDataBuf = msg.data;
-        
-        console.log("id: ",inIdBuf);
-        console.log("data: ",inDataBuf);
 
-        console.log();
+        const cmdType = inIdBuf[0].toString(2).padStart(8,'0').slice(3,5);
+        const errCode = inIdBuf[0].toString(2).padStart(8,'0').slice(5,8);
+        const command = inIdBuf[1];
+        var sourceID = new ControllerID();
+        var destinationID = new ControllerID();
+        sourceID.board = inIdBuf[2].toString(2).padStart(8,'0').slice(0,3);
+        sourceID.post = inIdBuf[2].toString(2).padStart(8,'0').slice(3,5);
+        sourceID.boardNo = inIdBuf[2].toString(2).padStart(8,'0').slice(5,8);
+        sourceID.name = this.getControlleName(sourceID.board);
+        destinationID.board = inIdBuf[3].toString(2).padStart(8,'0').slice(0,3);
+        destinationID.post = inIdBuf[3].toString(2).padStart(8,'0').slice(3,5);
+        destinationID.boardNo = inIdBuf[3].toString(2).padStart(8,'0').slice(5,8);
+        destinationID.name = this.getControlleName(destinationID.board);
 
+        console.log(`src:\x1b[96m${sourceID.name} ${sourceID.post} ${sourceID.boardNo} \x1b[00m` +
+                            `des:\x1b[96m${destinationID.name} ${destinationID.post} ${destinationID.boardNo} \x1b[00m` +
+                            `type:\x1b[96m${cmdType}\x1b[00m err:\x1b[96m${errCode}\x1b[00m ` +
+                            `cmd:\x1b[96m${command}\x1b[00m `+
+                            `data:\x1b[96m${inDataBuf.toString('hex').match(/.{1,2}/g).join(' ').toUpperCase()}\x1b[00m`);
+
+        switch(command){
+            case 0x00 :
+                console.log("updating chargers");
+                this.updateDeviceTable(sourceID);
+                break;
+            case 0x01 :
+                console.log("command 1");
+                break;
+            default :
+                console.log("defalut command");
+                break;
+
+        }
         
     }
     
@@ -269,7 +307,40 @@ class CAN{
 
             this.envcontrollers.push(obj);
         }
+    }
+     
+    getControlleName(board){
+        switch(board){
+            case '000': return "pc_";
+            case '001': return "cc_";
+            case '010': return "nc_";
+            case '011': return "tmc";
+            case '100': return "esv";
+            case '111': return "brd";
         }
+    
+    }
+
+    updateDeviceTable(sourceID){
+        switch(sourceID.name){
+            case "pc_":
+                console.log("Updating port controller");
+                let obj = {
+                    count: this.portcontrollers.length + 1,
+                    name: sourceID.name,
+                    board: sourceID.boardNo,
+                    post: sourceID.post,
+                    boardNo: sourceID.boardNo,
+                    timestamp: new Date().toISOString()
+                };
+                console.log(obj);
+                this.portcontrollers.push(obj);
+                break;
+            default:
+                console.log("source can not recognize :",sourceID.name);
+                break;
+        }
+    }
         
     print(msg){
         console.log(msg,canCmd['c']);
