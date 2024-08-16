@@ -20,7 +20,6 @@ var cancomm = {
 
 function dothis(){
     can.walk();
-    console.log(can.netcontrollers);
     
     //can.send('nc_','brd_','res_','invaldat',1,1);
     }
