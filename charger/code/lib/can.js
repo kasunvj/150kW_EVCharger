@@ -80,6 +80,7 @@ CAN Data interpretation
 
 const { cpSync } = require('fs');
 const can = require('socketcan');
+const { logger } = require('./log.js');
 const channel = can.createRawChannel('can0', true);
 
 const canCmdTyp = {
@@ -136,9 +137,9 @@ const protocolInfo = {
 
 class ControllerID{
     constructor(){
-        this.board = '';
-        this.post ='';
-        this.boardNo = '';
+        this.boardtype = '';
+        this.postid ='';
+        this.boardid = '';
         this.name = '';
         }
     }
@@ -156,11 +157,6 @@ class CAN{
     constructor(){
         this.a = 0;
         this.posts = [];
-        this.netcontrollers = [];
-        this.portcontrollers = [];
-        this.cabinetcontrollers = [];
-        this.themalcontrollers = [];
-        this.envcontrollers = [];
         this.start();
         }
         
@@ -205,7 +201,7 @@ class CAN{
         console.log()
         
         var buf = Buffer.from([cmdtypeAndErr,canCmd[cancmd],source,destination]);
-        console.log("Buffer: ",buf);
+        console.log("Out buffer: ",buf);
         return buf;
         }
 
@@ -216,34 +212,33 @@ class CAN{
         }
     
     decode(msg){
-
+        const inDataBuf = msg.data;
         var inIdBuf = Buffer.alloc(4);
         inIdBuf = Buffer.from(msg.id.toString(16).padStart(8,'0'),'hex');
-        const inDataBuf = msg.data;
-
+        console.log("In buffer:",inIdBuf);
         const cmdType = inIdBuf[0].toString(2).padStart(8,'0').slice(3,5);
         const errCode = inIdBuf[0].toString(2).padStart(8,'0').slice(5,8);
         const command = inIdBuf[1];
         var sourceID = new ControllerID();
         var destinationID = new ControllerID();
-        sourceID.board = inIdBuf[2].toString(2).padStart(8,'0').slice(0,3);
-        sourceID.post = inIdBuf[2].toString(2).padStart(8,'0').slice(3,5);
-        sourceID.boardNo = inIdBuf[2].toString(2).padStart(8,'0').slice(5,8);
-        sourceID.name = this.getControlleName(sourceID.board);
-        destinationID.board = inIdBuf[3].toString(2).padStart(8,'0').slice(0,3);
-        destinationID.post = inIdBuf[3].toString(2).padStart(8,'0').slice(3,5);
-        destinationID.boardNo = inIdBuf[3].toString(2).padStart(8,'0').slice(5,8);
-        destinationID.name = this.getControlleName(destinationID.board);
-
-        console.log(`src:\x1b[96m${sourceID.name} ${sourceID.post} ${sourceID.boardNo} \x1b[00m` +
-                            `des:\x1b[96m${destinationID.name} ${destinationID.post} ${destinationID.boardNo} \x1b[00m` +
+        sourceID.boardtype = inIdBuf[2].toString(2).padStart(8,'0').slice(0,3);
+        sourceID.postid = this.bin2dec(inIdBuf[2].toString(2).padStart(8,'0').slice(3,5));
+        sourceID.boardid = this.bin2dec(inIdBuf[2].toString(2).padStart(8,'0').slice(5,8));
+        sourceID.name = this.getControlleName(sourceID.boardtype);
+        destinationID.boardtype = inIdBuf[3].toString(2).padStart(8,'0').slice(0,3);
+        destinationID.postid = this.bin2dec(inIdBuf[3].toString(2).padStart(8,'0').slice(3,5));
+        destinationID.boardid = this.bin2dec(inIdBuf[3].toString(2).padStart(8,'0').slice(5,8));
+        destinationID.name = this.getControlleName(destinationID.boardtype);
+    
+        console.log(`\x1b[96mSRC device:${sourceID.name} post:${sourceID.postid} board:${sourceID.boardid} \x1b[00m` +
+                            `\x1b[95mDES device:${destinationID.name} post:${destinationID.postid} board:${destinationID.boardid} \x1b[00m` +
                             `type:\x1b[96m${cmdType}\x1b[00m err:\x1b[96m${errCode}\x1b[00m ` +
                             `cmd:\x1b[96m${command}\x1b[00m `+
                             `data:\x1b[96m${inDataBuf.toString('hex').match(/.{1,2}/g).join(' ').toUpperCase()}\x1b[00m`);
 
         switch(command){
             case 0x00 :
-                console.log("updating chargers");
+                console.log("updating devices");
                 this.updateDeviceTable(sourceID);
                 break;
             case 0x01 :
@@ -324,60 +319,177 @@ class CAN{
     }
 
     updateDeviceTable(sourceID){
-        const result_post = this.posts.find(item => item.id === sourceID.post);
+        const result_post = this.posts.find(item => item.postid === sourceID.postid);
+
         if(result_post){
-            console.log("Post exists",this.posts);
+            console.log("Post exists");
         }else{
-            console.log("Post creating :",sourceID.post);
-            console.log("Post creating :",this.posts.id);
+            console.log("Post creating");
             let obj = {
-                id : sourceID.post,
-                timestamp: new Date().toISOString()
+                postid : sourceID.postid,
+                netcontrollers :[],
+                portcontrollers :[],
+                cabinetcontrollers :[],
+                themalcontrollers :[],
+                envcontrollers :[],
+                //timestamp: new Date().toISOString()
             };
-            console.log(obj);
             this.posts.push(obj);
         }
 
+        const postindex = this.posts.findIndex(item => item.postid === sourceID.postid);
+
         switch(sourceID.name){
-            case "pc_":
-                console.log("Updating port controller");
-                if(!this.isDeviceAvalibale(sourceID,"pc_")){
+            case "nc_":
+                if(!this.isDeviceAvalibale(sourceID,postindex)){
                     let obj = {
-                        count: this.portcontrollers.length + 1,
+                        count: this.posts[postindex].netcontrollers.length + 1,
                         name: sourceID.name,
-                        board: sourceID.boardNo,
-                        post: sourceID.post,
-                        boardNo: sourceID.boardNo,
-                        timestamp: new Date().toISOString()
+                        boardid: sourceID.boardid,
+                        //timestamp: new Date().toISOString()
                     };
-                    console.log(obj);
-                    this.portcontrollers.push(obj);
+                    this.posts[postindex].netcontrollers.push(obj);
+                    console.log('+Network controller added');
                 }
                 else{
-                    console.log('cant create same device');
+                    console.log('Device type exists');
                 }
                 break;
+
+            case "pc_":
+                if(!this.isDeviceAvalibale(sourceID,postindex)){
+                    let obj = {
+                        count: this.posts[postindex].portcontrollers.length + 1,
+                        name: sourceID.name,
+                        boardid: sourceID.boardid,
+                        //timestamp: new Date().toISOString()
+                    };
+                    this.posts[postindex].portcontrollers.push(obj);
+                    console.log('+Port controller added');
+                }
+                else{
+                    console.log('Device type exists');
+                }
+                break;
+            
+            case "cc_":
+                if(!this.isDeviceAvalibale(sourceID,postindex)){
+                    let obj = {
+                        count: this.posts[postindex].cabinetcontrollers.length + 1,
+                        name: sourceID.name,
+                        boardid: sourceID.boardid,
+                        //timestamp: new Date().toISOString()
+                    };
+                    this.posts[postindex].cabinetcontrollers.push(obj);
+                    console.log('+Cabinet controller added');
+                }
+                else{
+                    console.log('Device type exists');
+                }
+                break;
+            
+            case "tmc":
+                if(!this.isDeviceAvalibale(sourceID,postindex)){
+                    let obj = {
+                        count: this.posts[postindex].themalcontrollers.length + 1,
+                        name: sourceID.name,
+                        boardid: sourceID.boardid,
+                        //timestamp: new Date().toISOString()
+                    };
+                    this.posts[postindex].themalcontrollers.push(obj);
+                    console.log('+t=Thermal controller added');
+                }
+                else{
+                    console.log('Device type exists');
+                }
+                break;
+
+            case "esv":
+                if(!this.isDeviceAvalibale(sourceID,postindex)){
+                    let obj = {
+                        count: this.posts[postindex].envcontrollers.length + 1,
+                        name: sourceID.name,
+                        boardid: sourceID.boardid,
+                        //timestamp: new Date().toISOString()
+                    };
+                    this.posts[postindex].envcontrollers.push(obj);
+                    console.log('+Environment controller added');
+                }
+                else{
+                    console.log('Device type exists');
+                }
+                break;
+    
             default:
                 console.log("source can not recognize :",sourceID.name);
                 break;
         }
+
+        /*
+        console.log("----------------------------- Post start");
+        const justtodisplay = this.posts.find(item => item.postid === sourceID.postid);
+        console.log("result_post ",justtodisplay);
+        console.log("----------------------------- Post end");
+        */
+        this.printDevices();
+        
     }
 
-    isDeviceAvalibale(sourceID){
-        let result_boardno  ;
+    isDeviceAvalibale(sourceID,postindex){
+        let result_id  ;
 
         switch(sourceID.name){
+            case "nc_":
+                result_id = this.posts[postindex].netcontrollers.find(item => item.boardid === sourceID.boardid);
+                return result_id;
             case "pc_":
-                result_boardno = this.portcontrollers.find(item => item.boardNo === sourceID.boardNo);
-                
-
-                console.log("found/notfound",result_boardno);
-                return result_boardno;
+                result_id = this.posts[postindex].portcontrollers.find(item => item.boardid === sourceID.boardid);
+                return result_id;
+            case "cc_":
+                result_id = this.posts[postindex].cabinetcontrollers.find(item => item.boardid === sourceID.boardid);
+                return result_id;
+            case "tmc":
+                result_id = this.posts[postindex].themalcontrollers.find(item => item.boardid === sourceID.boardid);
+                return result_id;
+            case "esv":
+                result_id = this.posts[postindex].envcontrollers.find(item => item.boardid === sourceID.boardid);
+                return result_id;
         }
 
-        return result_boardno ? true : false; 
+        return result_id ? true : false; 
 
     }
+
+    printDevices(){
+        console.log(`\x1b[92mpost-+-name-+-bid--------===========\x1b[00m`);
+        for(var i =0 ; i< this.posts.length ;i++){
+            console.log(this.posts[i].postid)
+            for(var j =0 ; j< this.posts[i].netcontrollers.length ;j++){
+                console.log(`       ${this.posts[i].netcontrollers[j].name}     ${this.posts[i].netcontrollers[j].boardid}`)   
+            }
+            for(var j =0 ; j< this.posts[i].portcontrollers.length ;j++){
+                console.log(`       ${this.posts[i].portcontrollers[j].name}    ${this.posts[i].portcontrollers[j].boardid}`)  
+            }
+            for(var j =0 ; j< this.posts[i].cabinetcontrollers.length ;j++){
+                console.log(`       ${this.posts[i].cabinetcontrollers[j].name}    ${this.posts[i].cabinetcontrollers[j].boardid}`)  
+            }
+            for(var j =0 ; j< this.posts[i].themalcontrollers.length ;j++){
+                console.log(`       ${this.posts[i].themalcontrollers[j].name}    ${this.posts[i].themalcontrollers[j].boardid}`)  
+            }
+            for(var j =0 ; j< this.posts[i].envcontrollers.length ;j++){
+                console.log(`       ${this.posts[i].envcontrollers[j].name}    ${this.posts[i].envcontrollers[j].boardid}`)  
+            }
+        }
+        console.log(`\x1b[92m====================================\x1b[00m`);
+    }
+
+    dec2bin(dec) {
+        return dec.toString(2).padStart(8, '0');
+      };
+    
+    bin2dec(bin) {
+        return parseInt(bin, 2);
+      };
         
     print(msg){
         console.log(msg,canCmd['c']);
