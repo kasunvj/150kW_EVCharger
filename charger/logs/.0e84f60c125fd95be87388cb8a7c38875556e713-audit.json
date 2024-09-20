@@ -1,0 +1,30 @@
+{
+    "keep": {
+        "days": false,
+        "amount": 24
+    },
+    "auditLog": "/home/linaro/charger/logs/.0e84f60c125fd95be87388cb8a7c38875556e713-audit.json",
+    "files": [
+        {
+            "date": 1724163955195,
+            "name": "/home/linaro/charger/logs/S0001-2024-08-20_19.log",
+            "hash": "3b513233d1b60f313d4e3c6ed5c2f6cb7deceee3814a3352de7cbb54e0b9d134"
+        },
+        {
+            "date": 1724164872284,
+            "name": "/home/linaro/charger/logs/S0001-2024-08-20_20.log",
+            "hash": "81ad5997261edb766eef165e1eae4b35a9f3fb20f02ab5da3c754c5b3ac7228a"
+        },
+        {
+            "date": 1724828459646,
+            "name": "/home/linaro/charger/logs/S0001-2024-08-28_12.log",
+            "hash": "404b6fc24f5796355c1de805831da9a4da6883d16f6ffe732b6d6ac0b2dd7535"
+        },
+        {
+            "date": 1726746114303,
+            "name": "/home/linaro/charger/logs/S0001-2024-09-19_17.log",
+            "hash": "54c3d67ed09d68a02abdedd12cc70da1a80da3a5a9815bbf6e6b8f7d95fae879"
+        }
+    ],
+    "hashType": "sha256"
+}

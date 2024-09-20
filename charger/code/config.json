@@ -1,0 +1,36 @@
+{
+  "M1": {
+    "identity": "S0001",
+    "password": "S0001",
+    "protocols": [
+      "ocpp1.6"
+    ],
+    "endpoint": "ws://52.89.241.125:8888",
+    "chargePointModel": "L2",
+    "chargerPrice": 80,
+    "evsePortId": 1,
+    "connectorPortId": 1,
+    "tariffMode": "ENERGY_BASED",
+    "mcuConfig": {
+      "uv_en":"01",
+      "ov_en":"01",
+      "sc_en":"01",
+      "cpf_en":"01",
+      "gfi_en":"01",
+      "gfit_en":"01",
+      "pl_en":"01",
+      "freq_en":"00",
+      "modbus_en":"01",
+      "penf_en":"00",
+      "ot_en":"00",
+      "uv_upper": "2005",
+      "uv_lower": "2000",
+      "ov_upper": "2600",
+      "ov_lower": "2550",
+      "freq_upper": "51",
+      "freq_lower": "49",
+      "max_current": "30"
+    }
+  },
+  "TZ": "UTC-5:30"
+}

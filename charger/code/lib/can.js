@@ -144,7 +144,7 @@ class ControllerID{
         }
     }
 
-
+var count = 0;
 
 var message = {
   id: 0x123, // CAN ID
@@ -183,6 +183,7 @@ class CAN{
         console.log('CAN channel started.');
         channel.addListener('onMessage', (msg) => {
               //console.log('Message received:', msg);
+              count++;
               this.decode(msg);
             });
         }
@@ -219,6 +220,7 @@ class CAN{
         const cmdType = inIdBuf[0].toString(2).padStart(8,'0').slice(3,5);
         const errCode = inIdBuf[0].toString(2).padStart(8,'0').slice(5,8);
         const command = inIdBuf[1];
+       
         var sourceID = new ControllerID();
         var destinationID = new ControllerID();
         sourceID.boardtype = inIdBuf[2].toString(2).padStart(8,'0').slice(0,3);
@@ -230,7 +232,7 @@ class CAN{
         destinationID.boardid = this.bin2dec(inIdBuf[3].toString(2).padStart(8,'0').slice(5,8));
         destinationID.name = this.getControlleName(destinationID.boardtype);
     
-        console.log(`\x1b[96mSRC device:${sourceID.name} post:${sourceID.postid} board:${sourceID.boardid} \x1b[00m` +
+        console.log(`${count} \x1b[96mSRC device:${sourceID.name} post:${sourceID.postid} board:${sourceID.boardid} \x1b[00m` +
                             `\x1b[95mDES device:${destinationID.name} post:${destinationID.postid} board:${destinationID.boardid} \x1b[00m` +
                             `type:\x1b[96m${cmdType}\x1b[00m err:\x1b[96m${errCode}\x1b[00m ` +
                             `cmd:\x1b[96m${command}\x1b[00m `+
@@ -251,7 +253,7 @@ class CAN{
         }
         
     }
-    
+    /*
     createMachines(ncCount,pcCount,ccCount,tmcCount,ecCount){
     
         for (let i = 0; i < ncCount; i++) {
@@ -304,7 +306,7 @@ class CAN{
 
             this.envcontrollers.push(obj);
         }
-    }
+    }*/
      
     getControlleName(board){
         switch(board){
