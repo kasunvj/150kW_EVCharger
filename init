@@ -1,0 +1,2 @@
+nmcli device wifi connect chargeNET password JB390BEAM2D
+nmcli connection modify chargeNET connection.autoconnect yes
