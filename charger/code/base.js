@@ -21,6 +21,7 @@ var cancomm = {
 
 function dothis(){
     can.walk();
+    can.send('nc_','cc_','req','normal',7,1)
     
     //can.send('nc_','brd_','res_','invaldat',1,1);
     }

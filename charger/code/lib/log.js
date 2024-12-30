@@ -15,7 +15,7 @@ const ensureDirectoryExistence = (filePath) => {
 };
 
 const fileTransport = new winston.transports.DailyRotateFile({
-  filename: `/home/linaro/charger/logs/${config.M1.identity}-%DATE%.log`,
+  filename: path.join(__dirname, 'log', `${config.M1.identity}-%DATE%.log`),
   datePattern: 'YYYY-MM-DD_HH',
   zippedArchive: true,
   maxSize: '10m',

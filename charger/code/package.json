@@ -1,0 +1,19 @@
+{
+  "name": "can_test_code",
+  "version": "1.0.0",
+  "description": "",
+  "main": "base.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "dependencies": {
+    "socketcan": "^4.0.5",
+    "winston": "^3.17.0",
+    "winston-daily-rotate-file": "^5.0.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

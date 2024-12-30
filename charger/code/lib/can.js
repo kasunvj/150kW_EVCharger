@@ -144,6 +144,15 @@ class ControllerID{
         }
     }
 
+class CCData{
+    constructor(){
+        this.defaultPower = 0;
+        this.phaseABVoltage = 0;
+        this.phaseBCVoltage = 0;
+        this.phaseCAVoltage = 0;
+    }
+}
+
 var count = 0;
 
 var message = {
@@ -159,11 +168,9 @@ class CAN{
         this.posts = [];
         this.start();
         }
-        
-    /*Basic fucntions that can access from base program*/
+    
     send(srcaddr,desaddr,cmdtype,canerr,cancmd,candata){
         
-        //message.id =this.assembleID(srcaddr,desaddr,cmdtype,canerr,cancmd);
         message.id = '0x'+ this.assembleID(srcaddr,desaddr,cmdtype,canerr,cancmd).toString('hex');
         message.data = this.assembleData(candata);
         
@@ -206,27 +213,29 @@ class CAN{
         return buf;
         }
 
-    assembleData(option){
-        var buf = Buffer.alloc(4)
-        buf = Buffer.from([0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07]);
+    assembleData(buff){
+        var buf = Buffer.alloc(8)
+        buf = Buffer.from([0x0,0x0,0x0,0x0,0x0,0x00,0x00,0x37]);
         return buf;
         }
     
     decode(msg){
-        const inDataBuf = msg.data;
         var inIdBuf = Buffer.alloc(4);
         inIdBuf = Buffer.from(msg.id.toString(16).padStart(8,'0'),'hex');
         console.log("In buffer:",inIdBuf);
+
         const cmdType = inIdBuf[0].toString(2).padStart(8,'0').slice(3,5);
         const errCode = inIdBuf[0].toString(2).padStart(8,'0').slice(5,8);
         const command = inIdBuf[1];
        
         var sourceID = new ControllerID();
         var destinationID = new ControllerID();
+        
         sourceID.boardtype = inIdBuf[2].toString(2).padStart(8,'0').slice(0,3);
         sourceID.postid = this.bin2dec(inIdBuf[2].toString(2).padStart(8,'0').slice(3,5));
         sourceID.boardid = this.bin2dec(inIdBuf[2].toString(2).padStart(8,'0').slice(5,8));
         sourceID.name = this.getControlleName(sourceID.boardtype);
+
         destinationID.boardtype = inIdBuf[3].toString(2).padStart(8,'0').slice(0,3);
         destinationID.postid = this.bin2dec(inIdBuf[3].toString(2).padStart(8,'0').slice(3,5));
         destinationID.boardid = this.bin2dec(inIdBuf[3].toString(2).padStart(8,'0').slice(5,8));
@@ -236,15 +245,20 @@ class CAN{
                             `\x1b[95mDES device:${destinationID.name} post:${destinationID.postid} board:${destinationID.boardid} \x1b[00m` +
                             `type:\x1b[96m${cmdType}\x1b[00m err:\x1b[96m${errCode}\x1b[00m ` +
                             `cmd:\x1b[96m${command}\x1b[00m `+
-                            `data:\x1b[96m${inDataBuf.toString('hex').match(/.{1,2}/g).join(' ').toUpperCase()}\x1b[00m`);
-
+                            `data:\x1b[96m${(msg.data).toString('hex').match(/.{1,2}/g).join(' ').toUpperCase()}\x1b[00m`);
+        
+        this.updateDeviceTable(sourceID);
         switch(command){
             case 0x00 :
                 console.log("updating devices");
-                this.updateDeviceTable(sourceID);
                 break;
             case 0x01 :
                 console.log("command 1");
+                break;
+            case 0x07:
+                console.log("Message from Cabinet Controller");
+                var obj = getDeviceObj(sourceID);
+                this.decodeCommandSeven(obj);
                 break;
             default :
                 console.log("defalut command");
@@ -252,6 +266,28 @@ class CAN{
 
         }
         
+    }
+
+    getDeviceObj(sourceID){
+        let obj;
+        let boardindex;
+        const postindex = this.posts.findIndex(item => item.postid === sourceID.postid);
+        switch(sourceID.name){
+            case "nc_":
+                boardindex = this.posts[postindex].netcontrollers.find(item => item.boardid === sourceID.boardid);
+            case "pc_":
+                boardindex = this.posts[postindex].portcontrollers.find(item => item.boardid === sourceID.boardid);
+            case "cc_":
+                boardindex = this.posts[postindex].cabinetcontrollers.find(item => item.boardid === sourceID.boardid);
+            case "tmc":
+                boardindex = this.posts[postindex].themalcontrollers.find(item => item.boardid === sourceID.boardid);
+            case "esv":
+                boardindex = this.posts[postindex].envcontrollers.find(item => item.boardid === sourceID.boardid);
+            default:
+                boardindex = 999;
+        }
+
+        return 
     }
     /*
     createMachines(ncCount,pcCount,ccCount,tmcCount,ecCount){
@@ -462,6 +498,35 @@ class CAN{
 
     }
 
+    getBoardID(){
+        let result_id = 999 ;
+
+        switch(sourceID.name){
+            case "nc_":
+                result_id = this.posts[postindex].netcontrollers.find(item => item.boardid === sourceID.boardid);
+                return result_id;
+            case "pc_":
+                result_id = this.posts[postindex].portcontrollers.find(item => item.boardid === sourceID.boardid);
+                return result_id;
+            case "cc_":
+                result_id = this.posts[postindex].cabinetcontrollers.find(item => item.boardid === sourceID.boardid);
+                return result_id;
+            case "tmc":
+                result_id = this.posts[postindex].themalcontrollers.find(item => item.boardid === sourceID.boardid);
+                return result_id;
+            case "esv":
+                result_id = this.posts[postindex].envcontrollers.find(item => item.boardid === sourceID.boardid);
+                return result_id;
+            default :
+                return result_id;
+        }
+
+    }
+
+    getPostID(sourceID){
+        return this.posts.find(item => item.postid === sourceID.postid);
+    }
+
     printDevices(){
         console.log(`\x1b[92mpost-+-name-+-bid--------===========\x1b[00m`);
         for(var i =0 ; i< this.posts.length ;i++){
@@ -483,6 +548,10 @@ class CAN{
             }
         }
         console.log(`\x1b[92m====================================\x1b[00m`);
+    }
+
+    decodeCommandSeven(msg){
+
     }
 
     dec2bin(dec) {
