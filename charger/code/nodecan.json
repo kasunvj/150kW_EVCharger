@@ -1,0 +1,49 @@
+{
+    "version":"0.1",
+    "protocolInfo":{
+        "post_nbits": 2,
+        "board_nbits":3,
+        "errorcode_nbits":3,
+        "command_nbits":8,
+        "src_address_nbits":8,
+        "dest_address_nbits" : 8,
+        "data_nbytes":8
+    },
+    "type":{
+        "request": "00",
+        "responce":"01"
+    },
+    "error":{
+        "normal":"000",
+        "okay":  "001",
+        "busy":  "010"
+    },
+    "command":{
+        "0": "0",
+        "1": "1",
+        "2": "2",
+        "3": "3",
+        "4": "4",
+        "5": "5",
+        "6": "6",
+        "7": "7",
+        "8": "8"
+    },
+    "board":{
+        "pc_":"000",
+        "cc_":"001",
+        "nc_":"010",
+        "tmc":"011",
+        "esc":"100",
+        "brd":"111"
+    },
+    "pcstate":{
+        "normal":3,
+        "estop": 5,
+        "ota":   7 
+    },
+    "systemInfo":{
+        "post":"01",
+        "nboard":"001"
+    }
+}

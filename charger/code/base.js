@@ -1,4 +1,4 @@
-const { CAN } = require('./lib/can.js');
+const { CAN } = require('./lib/can-test.js');
 const { logger } = require('./lib/log.js');
 const can = new CAN();
 

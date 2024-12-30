@@ -82,7 +82,9 @@ const { cpSync } = require('fs');
 const can = require('socketcan');
 const { logger } = require('./log.js');
 const channel = can.createRawChannel('can0', true);
+const nodecan = require('../nodecan.json');
 
+/*
 const canCmdTyp = {
     'req' :    0b00,
     'res' :    0b01}
@@ -134,6 +136,7 @@ const protocolInfo = {
     idsrcadd_bits:8,
     iddestadd_bits : 8
     }
+*/
 
 class ControllerID{
     constructor(){
@@ -202,7 +205,7 @@ class CAN{
         
     /*Internal Functions*/
     assembleID(src,des,cmdtype,canerr,cancmd){
-        const source = ((board[src] << protocolInfo.post_bits | sysInfo.post ) << protocolInfo.nboard_bits) | sysInfo.nboard;
+        const source = ((board[src] << nodecan.protocolInfo.post_nbits | nodecan.systemInfo.post ) << nodecan.protocolInfo.board_nbits) | nodecan.systemInfo.nboard;
         const destination = ((board[des] << protocolInfo.post_bits | sysInfo.post ) << protocolInfo.nboard_bits) | sysInfo.nboard;
         const cmdtypeAndErr = canCmdTyp[cmdtype] << protocolInfo.iderrorcode_bits | canErr[canerr];
         
