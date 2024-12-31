@@ -1,49 +1,330 @@
 {
     "version":"0.1",
     "protocolInfo":{
-        "post_nbits": 2,
-        "board_nbits":3,
-        "errorcode_nbits":3,
-        "command_nbits":8,
-        "src_address_nbits":8,
-        "dest_address_nbits" : 8,
-        "data_nbytes":8
+        "bits":{
+            "post": 2,
+            "board":3,
+            "errorcode":3,
+            "command":8,
+            "src":8,
+            "dest" : 8,
+            "msgtype":2
+
+        },
+        "bytes":{
+            "data":8
+        }
+        
     },
-    "type":{
-        "request": "00",
-        "responce":"01"
-    },
-    "error":{
-        "normal":"000",
-        "okay":  "001",
-        "busy":  "010"
-    },
-    "command":{
-        "0": "0",
-        "1": "1",
-        "2": "2",
-        "3": "3",
-        "4": "4",
-        "5": "5",
-        "6": "6",
-        "7": "7",
-        "8": "8"
-    },
+
     "board":{
-        "pc_":"000",
-        "cc_":"001",
-        "nc_":"010",
-        "tmc":"011",
-        "esc":"100",
-        "brd":"111"
+        "pc":0,
+        "cc":1,
+        "nc":2,
+        "tmc":3,
+        "esc":4,
+        "brd":5
     },
-    "pcstate":{
-        "normal":3,
-        "estop": 5,
-        "ota":   7 
+
+    "device":{
+        "pc":0,
+        "cc":1,
+        "nc":2,
+        "tmc":3,
+        "esc":4,
+        "bcast":5
     },
-    "systemInfo":{
-        "post":"01",
-        "nboard":"001"
+
+    "type":{
+        "request": 0,
+        "responce":1
+    },
+
+    "error":{
+        "normal":0,
+        "okay":  1,
+        "busy":  2
+    },
+
+    "command":{
+        "set_ota": {
+            "number":0,
+            "reqest":{},
+            "responce":{}
+        },
+        "set_config": {
+            "number":1,
+            "request":{},
+            "responce":{}
+        },
+        "set_voltagecurent": {
+            "number":2,
+            "reqest":{
+                "action":{
+                    "dtype":"string",
+                    "startbyte":0,
+                    "endbyte":1
+                },
+                "contactor":{
+                    "dtype":"string",
+                    "startbyte":0,
+                    "endbyte":1
+                },
+                "state":{
+                    "dtype":"string",
+                    "startbyte":1,
+                    "endbyte":2
+                },
+                "cabletemp":{
+                    "dtype":"string",
+                    "startbyte":3,
+                    "endbyte":4
+                },
+                "requestVoltage":{
+                    "dtype":"string",
+                    "startbyte":4,
+                    "endbyte":6
+                },
+                "requestCurrent":{
+                    "dtype":"string",
+                    "startbyte":6,
+                    "endbyte":8
+                }
+            },
+            "responce":{
+                "FBaction":{
+                    "dtype":"string",
+                    "startbyte":0,
+                    "endbyte":1
+                },
+                "FBcontactor":{
+                    "dtype":"string",
+                    "startbyte":0,
+                    "endbyte":1
+                },
+                "state":{
+                    "dtype":"string",
+                    "startbyte":1,
+                    "endbyte":2
+                },
+                "none":{
+                    "dtype":"string",
+                    "startbyte":3,
+                    "endbyte":4
+                },
+                "busVoltage":{
+                    "dtype":"string",
+                    "startbyte":4,
+                    "endbyte":6
+                },
+                "busCurrent":{
+                    "dtype":"string",
+                    "startbyte":6,
+                    "endbyte":8
+                }
+            }
+        },
+        "get_maxvoltage": {
+            "number":3,
+            "reqest":{},
+            "responce":{
+                "maxPower":{
+                    "dtype":"string",
+                    "startbyte":0,
+                    "endbyte":4
+                },
+                "maxVolatge":{
+                    "dtype":"string",
+                    "startbyte":4,
+                    "endbyte":6
+                },
+                "maxCurrent":{
+                    "dtype":"string",
+                    "startbyte":6,
+                    "endbyte":8
+                }
+                }
+        },
+        "set_portauth": {
+            "number":4,
+            "reqest":{
+                "chargingState":{
+                    "dtype":"string",
+                    "startbyte":0,
+                    "endbyte":1
+                },
+                "NCState":{
+                    "dtype":"string",
+                    "startbyte":1,
+                    "endbyte":2
+                }
+            },
+            "responce":{
+                "chargingState":{
+                    "dtype":"string",
+                    "startbyte":0,
+                    "endbyte":1
+                },
+                "ecode":{
+                    "dtype":"string",
+                    "startbyte":1,
+                    "endbyte":2
+                },
+                "flags":{
+                    "dtype":"string",
+                    "startbyte":2,
+                    "endbyte":3
+                },
+                "soc":{
+                    "dtype":"string",
+                    "startbyte":3,
+                    "endbyte":4
+                },
+                "instVoltage":{
+                    "dtype":"string",
+                    "startbyte":4,
+                    "endbyte":6
+                },
+                "instCurrent":{
+                    "dtype":"string",
+                    "startbyte":6,
+                    "endbyte":8
+                }
+            }
+        },
+        "get_portmesurement": {
+            "number":5,
+            "reqest":{},
+            "responce":{
+               "accEnergy":{
+                    "dtype":"string",
+                    "startbyte":0,
+                    "endbyte":4
+                }, 
+                "instPower":{
+                    "dtype":"string",
+                    "startbyte":4,
+                    "endbyte":8
+                }
+            }
+        },
+        "get_tmctemp": {
+            "number":6,
+            "reqest":{
+                "CCState":{
+                    "dtype":"string",
+                    "startbyte":0,
+                    "endbyte":1
+                }, 
+                "cabinetPowerOut":{
+                    "dtype":"string",
+                    "startbyte":1,
+                    "endbyte":3
+                }, 
+                "maxTemp":{
+                    "dtype":"string",
+                    "startbyte":5,
+                    "endbyte":6
+                },
+                "minTemp":{
+                    "dtype":"string",
+                    "startbyte":6,
+                    "endbyte":7
+                }, 
+                "avgTemp":{
+                    "dtype":"string",
+                    "startbyte":7,
+                    "endbyte":8
+                }
+            },
+            "responce":{
+                "coolentTemp":{
+                    "dtype":"string",
+                    "startbyte":6,
+                    "endbyte":7
+                }, 
+                "TMCState":{
+                    "dtype":"string",
+                    "startbyte":7,
+                    "endbyte":8
+                }
+            }
+        },
+        "set_escstate": {
+            "number":7,
+            "reqest":{
+                "errorCode1":{
+                    "dtype":"string",
+                    "startbyte":0,
+                    "endbyte":1
+                }, 
+                "errorCode2":{
+                    "dtype":"string",
+                    "startbyte":1,
+                    "endbyte":2
+                }, 
+                "errorCode3":{
+                    "dtype":"string",
+                    "startbyte":2,
+                    "endbyte":3
+                }, 
+                "errorCode4":{
+                    "dtype":"string",
+                    "startbyte":3,
+                    "endbyte":4
+                } 
+            },
+            "responce":{}
+        },
+        "set_maxpower": {
+            "number":8,
+            "reqest":{
+                "maxPowerLimit":{
+                    "dtype":"string",
+                    "startbyte":4,
+                    "endbyte":8
+                }
+            },
+            "responce":{
+                "defaultPower":{
+                    "dtype":"string",
+                    "startbyte":0,
+                    "endbyte":2
+                }, 
+                "phaseABVoltage":{
+                    "dtype":"string",
+                    "startbyte":2,
+                    "endbyte":4
+                },
+                "phaseBCVoltage":{
+                    "dtype":"string",
+                    "startbyte":4,
+                    "endbyte":6
+                },
+                "phaseCAVoltage":{
+                    "dtype":"string",
+                    "startbyte":6,
+                    "endbyte":8
+                }
+            }
+        },
+        "set_logdata": {
+            "number":9,
+            "reqest":{
+                "multiplexor":{
+                    "dtype":"string",
+                    "startbyte":0,
+                    "endbyte":1
+                },
+                "logData":{
+                    "dtype":"string",
+                    "startbyte":1,
+                    "endbyte":8
+                }
+            },
+            "responce":{}
+        }
     }
+
+    
 }

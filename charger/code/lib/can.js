@@ -209,8 +209,6 @@ class CAN{
         const destination = ((board[des] << protocolInfo.post_bits | sysInfo.post ) << protocolInfo.nboard_bits) | sysInfo.nboard;
         const cmdtypeAndErr = canCmdTyp[cmdtype] << protocolInfo.iderrorcode_bits | canErr[canerr];
         
-        console.log()
-        
         var buf = Buffer.from([cmdtypeAndErr,canCmd[cancmd],source,destination]);
         console.log("Out buffer: ",buf);
         return buf;

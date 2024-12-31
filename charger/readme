@@ -1,7 +1,1 @@
-sudo systemctl enable wifiup.service
-sudo systemctl daemon-reload
-sudo systemctl start wifiup.service
-sudo systemctl enable check_internet.service
-sudo systemctl daemon-reload
-sudo systemctl start check_internet.service
-sudo journalctl -u wifi.service -f
+node -v shpuld be 18.18.2

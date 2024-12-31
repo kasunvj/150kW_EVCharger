@@ -24,6 +24,11 @@
             "date": 1735560474168,
             "name": "/home/vegaav/150kW_EVCharger/charger/code/lib/log/S0001-2024-12-30_17.log",
             "hash": "c85029d59c038ba731eb86da3e6b367b1de06937402bb7a67e4e122768274826"
+        },
+        {
+            "date": 1735628654947,
+            "name": "/home/vegaav/150kW_EVCharger/charger/code/lib/log/S0001-2024-12-31_12.log",
+            "hash": "82b58c21822ac53c37b674f1a7a2c0ef84670c8c91cb51eb66cdd445f704a11a"
         }
     ],
     "hashType": "sha256"

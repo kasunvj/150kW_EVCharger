@@ -1,29 +1,22 @@
-const { CAN } = require('./lib/can-test.js');
+const { CanModule } = require('./lib/can-test.js');
+const canbus = require('./nodecan.json');
 const { logger } = require('./lib/log.js');
-const can = new CAN();
-
-/*
- *  
- * cancomm
- *  commandType :  'req','res' 
- *  canError    :  'normal','okay','busy','invalcmd','invaldat'
- *  canCommand  :   0,1,2,3,4,5,6,7,8
- *  canSource   :  'pc_','cc_','nc_','tmc','esc','brd'
- *  canDestin   :  'pc_','cc_','nc_','tmc','esc','brd'
- * 
-*/
+const can = new CanModule();
 
 var cancomm = {
-    cmdType : 'req',    // 
-    canErr  : 'normal', // 'normal','okay','busy','invalcmd','invaldat'
-    camCmd  : 1,        // 
+    cmdType : 'req',    
+    canErr  : 'normal', 
+    camCmd  : 1,        
     }
 
 function dothis(){
-    can.walk();
-    can.send('nc_','cc_','req','normal',7,1)
-    
-    //can.send('nc_','brd_','res_','invaldat',1,1);
+    //can.walk();
+    can.send(canbus.board.tmc,
+        canbus.board.cc,
+        canbus.type.request,
+        canbus.error.normal,
+        canbus.command.set_ota.number,1)
+
     }
     
 dothis()
