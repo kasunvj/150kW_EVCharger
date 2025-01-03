@@ -7,6 +7,7 @@
     "lib": "lib"
   },
   "dependencies": {
+    "blessed": "^0.1.81",
     "socketcan": "^4.0.5",
     "winston": "^3.17.0",
     "winston-daily-rotate-file": "^5.0.0"

@@ -1,4 +1,4 @@
-const canbus = require('../nodecan.json');
+const nodecan = require('../nodecan.json');
 const can = require('socketcan');
 const channel = can.createRawChannel('can0', true);
 
@@ -26,7 +26,7 @@ class CanModule{
         channel.addListener('onMessage', (msg) => {
               //console.log('Message received:', msg);
               count++;
-              //this.decode(msg);
+              this.decode(msg);
             });
         }
     
@@ -38,21 +38,48 @@ class CanModule{
         console.log('CAN channel stopped.');
         } 
 
-    send(src,des,cmdtype,canerr,cancmd,candata){
+    send(src,dest,type,errorcode,command,candata){
         /*
         srcaddr: 'String' Source address. 
         */
-       console.log(`${src.toString(2)}`);
-       console.log(`${dest.toString(2)}`);
-       console.log(`${cmdtype.toString(2)}`);
-       console.log(`${canerr.toString(2)}`);
-       console.log(`${cancmd.toString(2)}`);
+       console.log(`${src.toString(2).padStart(nodecan.protocol.bits.src,"0")}`);
+       console.log(`${dest.toString(2).padStart(nodecan.protocol.bits.dest,"0")}`);
+       console.log(`${type.toString(2).padStart(nodecan.protocol.bits.type,"0")}`);
+       console.log(`${errorcode.toString(2).padStart(nodecan.protocol.bits.errorcode,"0")}`);
+       console.log(`${command.toString(2).padStart(nodecan.protocol.bits.command,"0")}`);
         //message.id = '0x'+ this.assembleID(src,des,cmdtype,canerr,cancmd).toString('hex');
         //message.data = this.assembleData(candata);
         
         //channel.send(message);
         //console.log('Message sent:', message);
         }
+    
+    //encodeId(src,dest,type,errorcode,command){
+    //   const srcBitAssembly = src.toString(2).padStart(nodecan.protocol.bits.src,"0")
+    //}
+
+    decode(msg){
+        /*
+        identifire - 29 bits (4 bytes)
+        data - 8 bytes
+        */
+        var id = Buffer.alloc(4);
+        id = Buffer.from(msg.id.toString(16).padStart(8,'0'),'hex');
+        console.log("In buffer:",id);
+
+        const type = id[nodecan.type.bytelocation].
+                        toString(2).padStart(8,'0').
+                            slice(nodecan.type.bitlocation.start,nodecan.type.bitlocation.end);
+        const error = id[nodecan.error.bytelocation].
+                        toString(2).padStart(8,'0').
+                            slice(nodecan.error.bitlocation.start,nodecan.type.bitlocation.end);
+        const command = id[nodecan.command.bytelocation];
+
+        console.log("type",type);
+        console.log("error",error);
+        console.log("command",command);
+    }
+
 
 
   }

@@ -1,6 +1,6 @@
 {
     "version":"0.1",
-    "protocolInfo":{
+    "protocol":{
         "bits":{
             "post": 2,
             "board":3,
@@ -8,7 +8,7 @@
             "command":8,
             "src":8,
             "dest" : 8,
-            "msgtype":2
+            "type":2
 
         },
         "bytes":{
@@ -37,16 +37,27 @@
 
     "type":{
         "request": 0,
-        "responce":1
+        "responce":1,
+        "bytelocation":0,
+        "bitlocation":{
+            "start":3,
+            "end":5
+        }
     },
 
     "error":{
         "normal":0,
         "okay":  1,
-        "busy":  2
+        "busy":  2,
+        "bytelocation":0,
+        "bitlocation":{
+            "start":5,
+            "end":8
+        }
     },
 
     "command":{
+        "bytelocation":1,
         "set_ota": {
             "number":0,
             "reqest":{},
@@ -323,6 +334,50 @@
                 }
             },
             "responce":{}
+        }
+    },
+
+    "source":{
+        "bytelocation":2,
+        "type":{
+            "bitlocation":{
+                "start":0,
+                "end":3
+            }
+        },
+        "post":{
+            "bitlocation":{
+                "start":3,
+                "end":5
+            }
+        },
+        "board":{
+            "bitlocation":{
+                "start":5,
+                "end":8
+            }
+        }
+    },
+
+    "destination":{
+        "bytelocation":3,
+        "type":{
+            "bitlocation":{
+                "start":0,
+                "end":3
+            }
+        },
+        "post":{
+            "bitlocation":{
+                "start":3,
+                "end":5
+            }
+        },
+        "board":{
+            "bitlocation":{
+                "start":5,
+                "end":8
+            }
         }
     }
 
