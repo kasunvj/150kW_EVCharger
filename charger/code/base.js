@@ -11,8 +11,8 @@ var cancomm = {
 
 function dothis(){
     //can.walk();
-    can.send(canbus.board.tmc,
-        canbus.board.cc,
+    can.send(canbus.source.type.tmc,
+        canbus.destination.type.cc,
         canbus.type.request,
         canbus.error.normal,
         canbus.command.set_ota.number,1)

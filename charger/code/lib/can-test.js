@@ -65,7 +65,7 @@ class CanModule{
         */
         var id = Buffer.alloc(4);
         id = Buffer.from(msg.id.toString(16).padStart(8,'0'),'hex');
-        console.log("In buffer:",id);
+        console.log("messge in:",id);
 
         const type = id[nodecan.type.bytelocation].
                         toString(2).padStart(8,'0').

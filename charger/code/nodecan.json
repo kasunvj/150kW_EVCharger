@@ -17,27 +17,10 @@
         
     },
 
-    "board":{
-        "pc":0,
-        "cc":1,
-        "nc":2,
-        "tmc":3,
-        "esc":4,
-        "brd":5
-    },
-
-    "device":{
-        "pc":0,
-        "cc":1,
-        "nc":2,
-        "tmc":3,
-        "esc":4,
-        "bcast":5
-    },
-
     "type":{
         "request": 0,
         "responce":1,
+        "nbits":2,
         "bytelocation":0,
         "bitlocation":{
             "start":3,
@@ -47,8 +30,11 @@
 
     "error":{
         "normal":0,
-        "okay":  1,
+        "fault":  1,
         "busy":  2,
+        "invalcmd":3,
+        "invaldata":4,
+        "nbits":3,
         "bytelocation":0,
         "bitlocation":{
             "start":5,
@@ -57,6 +43,7 @@
     },
 
     "command":{
+        "nbits":8,
         "bytelocation":1,
         "set_ota": {
             "number":0,
@@ -340,18 +327,39 @@
     "source":{
         "bytelocation":2,
         "type":{
+            "pc":0,
+            "cc":1,
+            "nc":2,
+            "tmc":3,
+            "esc":4,
+            "brd":5,
+            "nbits":3,
             "bitlocation":{
                 "start":0,
                 "end":3
             }
         },
         "post":{
+            "post0":0,
+            "post1":1,
+            "post2":2,
+            "post3":3,
+            "post4":4,
+            "post5":5,
+            "nbits":2,
             "bitlocation":{
                 "start":3,
                 "end":5
             }
         },
         "board":{
+            "board0":0,
+            "board1":1,
+            "board2":2,
+            "board3":3,
+            "board4":4,
+            "board5":5,
+            "nbits":3,
             "bitlocation":{
                 "start":5,
                 "end":8
@@ -362,18 +370,39 @@
     "destination":{
         "bytelocation":3,
         "type":{
+            "pc":0,
+            "cc":1,
+            "nc":2,
+            "tmc":3,
+            "esc":4,
+            "brd":5,
+            "nbits":3,
             "bitlocation":{
                 "start":0,
                 "end":3
             }
         },
         "post":{
+            "post0":0,
+            "post1":1,
+            "post2":2,
+            "post3":3,
+            "post4":4,
+            "post5":5,
+            "nbits":2,
             "bitlocation":{
                 "start":3,
                 "end":5
             }
         },
         "board":{
+            "board0":0,
+            "board1":1,
+            "board2":2,
+            "board3":3,
+            "board4":4,
+            "board5":5,
+            "nbits":3,
             "bitlocation":{
                 "start":5,
                 "end":8
