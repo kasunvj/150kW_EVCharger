@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=RunCommands
+Exec=lxterminal --fullscreen -e "/home/vegaav/150kW_EVCharger/startup-script.sh"
+X-GNOME-Autostart-enabled=true

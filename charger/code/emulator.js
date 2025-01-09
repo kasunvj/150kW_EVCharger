@@ -53,8 +53,11 @@ async function navigatePages() {
   let currentPage = 1;
   let type,error,sourcetype,sourcepost,sourceboard,destype,despost,desboard;
   var command = Buffer.alloc(1);
-  let firstbyte,secondbyte,thirdbyte,fourthbyte;
-  let str=":";
+  var firstbyte = 0b00000000;
+  var secondbyte= 0b00000000;
+  var thirdbyte= 0b00000000;
+  var fourthbyte= 0b00000000;
+  let str="";
 
   while (true) {
     let selection;
@@ -64,21 +67,20 @@ async function navigatePages() {
     if (currentPage === 1) {
       selection = await createPage('Command Type', ['Request', 'Responce']);
       if (selection === 'Request') {
-        console.log(`Selected: Request`);
-        str = str + "request ";
+        str = str + "cmdtyp: request, \n";
         type = canbus.type.request;
 
       } 
       else if (selection === 'Responce') {
-        console.log(`Selected: Response`);
-        str = str + "responce ";
+        str = str + "cmdtyp: responce, \n";
         type = canbus.type.responce;
         currentPage = 1;      
       }
 
+
       currentPage = 2;
       console.log(`\x1b[93m${type.toString(2).padStart(canbus.type.nbits,'0')}\x1b[00m`) 
-      console.log(str)
+      console.log(str+"\n")
     }
 
     //2
@@ -87,29 +89,26 @@ async function navigatePages() {
         'Normal',
         'Fault',
         'Busy',
-        'Invalid Commad',
+        'Invalid Command',
         'Invalid Data']);
 
       if (selection === 'Normal'){
-        console.log('Selected: Normal');
-        str = str + "normal ";
+        str = str + "errtyp: normal, \n";
         error = canbus.error.normal
       }else if (selection === 'Fault'){
-        console.log(`Selected: Fault`);
-        str = str + "fault ";
+        str = str + "errtyp: fault, \n";
         error = canbus.error.fault
       }else if (selection === 'Busy'){
-        console.log(`Selected: Busy`);
-        str = str + "busy";
+        str = str + "errtyp: busy, \n";
         error = canbus.error.busy
       }else if (selection === 'Invalid Command'){
-        console.log(`Selected: Invalid Command`);
-        str = str + "inval_cmd";
+        str = str + "errtyp: inval_cmd, \n";
         error = canbus.error.invalcmd
       }else if (selection === 'Invalid Data'){
-        console.log(`Selected: Invalid Data`);
-        str = str + "inval_busy";
+        str = str + "errtyp: inval_busy, \n";
         error = canbus.error.invaldata
+      }else{
+        str = str + selection;
       }
       
       if (selection === 'Back') {
@@ -123,6 +122,7 @@ async function navigatePages() {
       
       firstbyte = (type << canbus.error.nbits) | error ;
       console.log(`\x1b[93m${firstbyte.toString(2).padStart(8,'0')}\x1b[00m`);
+      console.log(str);
       
     } 
 
@@ -139,48 +139,37 @@ async function navigatePages() {
         '0x07',
         '0x08',
         '0x09',
-        'Broadcast',
       ]);
     
       if (selection === '0x00') {
-        console.log('Selected: set ota packet (req)NC-(resp)Any');
-        str = str + "cmd: 00";
+        str = str + "cmd: 00 nc->any, \n";
         command = Buffer.from([0x00]);
       } else if (selection === '0x01') {
-        console.log('Selected: set configuration packet (req)NC-(resp)Any');
-        str = str + "cmd: 01";
+        str = str + "cmd: 01 nc->any, \n";
         command = Buffer.from([0x01]);
       } else if (selection === '0x02') {
-        console.log('Selected: set req voltage (req)PC-(resp)CC');
-        str = str + "cmd: 02";
+        str = str + "cmd: 02 pc->cc, \n";
         command = Buffer.from([0x02]);
       } else if (selection === '0x03') {
-        console.log('Selected: get max voltage (req)PC-(resp)CC');
-        str = str + "cmd: 03";
+        str = str + "cmd: 03 pc->cc, \n";
         command = Buffer.from([0x03]);
       } else if (selection === '0x04') {
-        console.log('Selected: set port auth (req)NC-(resp)PC');
-        str = str + "cmd: 04";
+        str = str + "cmd: 04 nc->pc, \n";
         command = Buffer.from([0x04]);
       } else if (selection === '0x05') {
-        console.log('Selected: get port measurement (req)NC-(resp)PC');
-        str = str + "cmd: 05";
+        str = str + "cmd: 05 nc->pc, \n";
         command = Buffer.from([0x05]);
       } else if (selection === '0x06') {
-        console.log('Selected: set tmc temp (req)CC-(resp)TMC');
-        str = str + "cmd: 06";
+        str = str + "cmd: 06 cc->tmc, \n";
         command = Buffer.from([0x06]);
       } else if (selection === '0x07') {
-        console.log('Selected: set ECS state (req)ECS-(resp)BRD');
-        str = str + "cmd: 07";
+        str = str + "cmd: 07 ecs->brdc, \n";
         command = Buffer.from([0x07]);
       }else if (selection === '0x08') {
-        console.log('Selected: set max power (req)NC-(resp)CC');
-        str = str + "cmd: 08";
+        str = str + "cmd: 08 nc->cc, \n";
         command = Buffer.from([0x08]);
       }else if (selection === '0x09') {
-        console.log('Selected: set log data (req)PC/CC-(resp)BRD');
-        str = str + "cmd: 09";
+        str = str + "cmd: 09 pc/cc->brd, \n";
         command = Buffer.from([0x09]);
       }
       
@@ -195,7 +184,7 @@ async function navigatePages() {
 
       secondbyte = command[0].toString(2);
       console.log(`\x1b[93m${firstbyte.toString(2).padStart(8,'0')} ${secondbyte.toString(2).padStart(8,'0')}\x1b[00m`);
-      
+      console.log(str);
     }
 
     //4
@@ -210,23 +199,23 @@ async function navigatePages() {
         ]);
       
         if (selection === 'Port Controller') {
-          console.log('(Source): Port Controller');
-          str = "(source)pc ";
-          sourcetype = canbus.source.type.pc.toString(2);
+          str = str+ "(source)pc, ";
+          sourcetype = canbus.source.type.pc;
         } else if (selection === 'Cabinet Controller') {
-          console.log('(Source): Cabinet Controller');
-          sourcetype = canbus.source.type.cc.toString(2);
+          str = str+ "(source)cc, ";
+          sourcetype = canbus.source.type.cc;
         } else if (selection === 'Network Controller') {
-          console.log('(Source): Network Controller');
-          sourcetype = canbus.source.type.nc.toString(2);
+          str = str+ "(source)nc, ";
+          sourcetype = canbus.source.type.nc ;
         } else if (selection === 'Thermal Management Controller') {
-          console.log('(Source): Thermal Management Controller');
-          sourcetype = canbus.source.type.tmc.toString(2);
+          str = str+ "(source)tmc, ";
+          sourcetype = canbus.source.type.tmc;
         } else if (selection === 'Environmental Sensor Controller') {
-          console.log('(Source): Environmental Sensor Controller');
-          sourcetype = canbus.source.type.esc.toString(2);
+          str = str+ "(source)esc, ";
+          sourcetype = canbus.source.type.esc;
         } else if (selection === 'Broadcast') {
-          console.log('(Source): Broadcast');
+          str = str+ "(source)bcast, ";
+          sourcetype = canbus.source.type.brd;
         }
         
         if (selection === 'Back') {
@@ -236,8 +225,7 @@ async function navigatePages() {
           currentPage = 5;
         }
 
-
-        
+        str = str+ "\n";
       }
       
       //5
@@ -252,24 +240,23 @@ async function navigatePages() {
         ]);
 
         if(selection === '00'){
-          console.log('     +--- post 00');
-          str = "post 00 ";
-          sourcepost = canbus.source.post.post0.toString(2);
+          str = str+ "  post 00, ";
+          sourcepost = canbus.source.post.post0;
         }else if(selection === '01'){
-          console.log('     +--- post 01');
-          sourcepost = canbus.source.post.post1.toString(2);
+          str = str+ "  post 01, ";
+          sourcepost = canbus.source.post.post1;
         }else if(selection === '02'){
-          console.log('     +--- post 02');
-          sourcepost = canbus.source.post.post2.toString(2);
+          str = str+ "  post 02, ";
+          sourcepost = canbus.source.post.post2;
         }else if(selection === '03'){
-          console.log('     +--- post 03');
-          sourcepost = canbus.source.post.post3.toString(2);
+          str = str+ "  post 03, ";
+          sourcepost = canbus.source.post.post3;
         }else if(selection === '04'){
-          console.log('     +--- post 04');
-          sourcepost = canbus.source.post.post4.toString(2);
+          str = str+ "  post 04, ";
+          sourcepost = canbus.source.post.post4;
         }else if(selection === '05'){
-          console.log('     +--- post 05');
-          sourcepost = canbus.source.post.post5.toString(2);
+          str = str+ "  post 05, ";
+          sourcepost = canbus.source.post.post5;
         }
         
         if (selection === 'Back') {
@@ -278,7 +265,7 @@ async function navigatePages() {
         }else{
           currentPage = 6;
         }
-        
+
       }
 
         //6
@@ -293,24 +280,23 @@ async function navigatePages() {
           ]);
   
           if(selection === '00'){
-            console.log('     +--- board 00');
-            str = "board 00 ";
-            sourceboard = canbus.source.board.board0.toString(2);
+            str = str+ "  board 00, ";
+            sourceboard = canbus.source.board.board0;
           }else if(selection === '01'){
-            console.log('     +--- board 01');
-            sourceboard = canbus.source.board.board1.toString(2);
+            str = str+ "  board 01,  ";
+            sourceboard = canbus.source.board.board1;
           }else if(selection === '02'){
-            console.log('     +--- board 02');
-            sourceboard = canbus.source.board.board2.toString(2);
+            str = str+ "  board 02, ";
+            sourceboard = canbus.source.board.board2;
           }else if(selection === '03'){
-            console.log('     +--- board 03');
-            sourceboard = canbus.source.board.board3.toString(2);
+            str = str+ "  board 03, ";
+            sourceboard = canbus.source.board.board3;
           }else if(selection === '04'){
-            console.log('     +--- board 04');
-            sourceboard = canbus.source.board.board4.toString(2);
+            str = str+ "  board 04, ";
+            sourceboard = canbus.source.board.board4;
           }else if(selection === '05'){
-            console.log('     +--- board 05');
-            sourceboard = canbus.source.board.board5.toString(2);
+            str = str+ "  board 05, ";
+            sourceboard = canbus.source.board.board5;
           }
           
           if (selection === 'Back') {
@@ -319,8 +305,10 @@ async function navigatePages() {
           }else{
             currentPage = 7; 
           }
+          
 
-          thirdbyte = (((type << canbus.source.post.nbits) | sourcepost ) << canbus.source.board.nbits) | sourceboard ; 
+
+          thirdbyte = (((sourcetype << canbus.source.post.nbits) | sourcepost ) << canbus.source.board.nbits) | sourceboard ; 
           console.log(`\x1b[93m${firstbyte.toString(2).padStart(8,'0')} ${secondbyte.toString(2).padStart(8,'0')} ${thirdbyte.toString(2).padStart(8,'0')}\x1b[00m`)
         }
 
@@ -334,24 +322,27 @@ async function navigatePages() {
             'Environmental Sensor Controller',
             'Broadcast',
           ]);
+
+          str = str+ "\n";
         
           if (selection === 'Port Controller') {
-            console.log('(Destination): Port Controller');
-            destype = canbus.destination.type.pc.toString(2)
+            str = str+ "(des)pc, ";
+            destype = canbus.destination.type.pc;
           } else if (selection === 'Cabinet Controller') {
-            console.log('(Destination): Cabinet Controller');
-            destype = canbus.destination.type.cc.toString(2)
+            str = str+ "(des)pc, ";
+            destype = canbus.destination.type.cc;
           } else if (selection === 'Network Controller') {
-            console.log('(Destination): Network Controller');
-            destype = canbus.destination.type.nc.toString(2);
+            str = str+ "(des)nc, ";
+            destype = canbus.destination.type.nc;
           } else if (selection === 'Thermal Management Controller') {
-            console.log('(Destination): Thermal Management Controller');
-            destype = canbus.destination.type.tmc.toString(2)
+            str = str+ "(des)tmc, ";
+            destype = canbus.destination.type.tmc;
           } else if (selection === 'Environmental Sensor Controller') {
-            console.log('(Destination): Environmental Sensor Controller');
-            destype = canbus.destination.type.esc.toString(2)
+            str = str+ "(des)esc, ";
+            destype = canbus.destination.type.esc;
           } else if (selection === 'Broadcast') {
-            console.log('(Destination): Broadcast');
+            str = str+ "(des)bcast, ";
+            destype = canbus.destination.type.brd;
           } 
           
           if (selection === 'Back') {
@@ -361,6 +352,7 @@ async function navigatePages() {
             currentPage = 8;
           }
           
+          str = str+ "\n";
         }
 
         //8
@@ -375,23 +367,23 @@ async function navigatePages() {
           ]);
 
           if(selection === '00'){
-            console.log('      +------- post 00');
-            despost = canbus.destination.post.post0.toString(2)
+            str = str+ "  post 00, ";
+            despost = canbus.destination.post.post0;
           }else if(selection === '01'){
-            console.log('      +------- post 01');
-            despost = canbus.destination.post.post1.toString(2)
+            str = str+ "  post 01, ";
+            despost = canbus.destination.post.post1;
           }else if(selection === '02'){
-            console.log('      +------- post 02');
-            despost = canbus.destination.post.post2.toString(2)
+            str = str+ "  post 02, ";
+            despost = canbus.destination.post.post2;
           }else if(selection === '03'){
-            console.log('      +------- post 03');
-            despost = canbus.destination.post.post3.toString(2)
+            str = str+ "  post 03, ";
+            despost = canbus.destination.post.post3;
           }else if(selection === '04'){
-            console.log('      +------- post 04');
-            despost = canbus.destination.post.post4.toString(2)
+            str = str+ "  post 04, ";
+            despost = canbus.destination.post.post4;
           }else if(selectSelectedion === '05'){
-            console.log('      +------- post 05');
-            despost = canbus.destination.post.post5.toString(2)
+            str = str+ "  post 05, ";
+            despost = canbus.destination.post.post5;
           }
           
           if (selection === 'Back') {
@@ -400,6 +392,8 @@ async function navigatePages() {
           }else{
             currentPage = 9;
           }
+
+          str = str+ "\n";
           
         }
 
@@ -415,40 +409,52 @@ async function navigatePages() {
             ]);
     
             if(selection === '00'){
-              console.log('      +------- board 00');
-              desboard = canbus.destination.board.board0.toString(2);
+              str = str+ "  board 00, ";
+              desboard = canbus.destination.board.board0;
             }else if(selection === '01'){
-              console.log('      +------- board 01');
-              desboard = canbus.destination.board.board1.toString(2);
+              str = str+ "  board 01, ";
+              desboard = canbus.destination.board.board1;
             }else if(selection === '02'){
-              console.log('      +------- board 02');
-              desboard = canbus.destination.board.board2.toString(2);
+              str = str+ "  board 02, ";
+              desboard = canbus.destination.board.board2;
             }else if(selection === '03'){
-              console.log(' +-----    board 03');
-              desboard = canbus.destination.board.board3.toString(2);
+              str = str+ "  board 03, ";
+              desboard = canbus.destination.board.board3;
             }else if(selection === '04'){
-              console.log(' +-----    board 04');
-              desboard = canbus.destination.board.board4.toString(2);
+              str = str+ "  board 04, ";
+              desboard = canbus.destination.board.board4;
             }else if(selection === '05'){
-              console.log(' +-----    board 05');
-              desboard = canbus.destination.board.board5.toString(2);
+              str = str+ "  board 05, ";
+              desboard = canbus.destination.board.board5;
             }
             if (selection === 'Back') {
               currentPage = 8;
               console.log('backing..');
             } 
             else{
-
+              currentPage = 10;
             }
-            console.log(desboard);
-
-            fourthbyte = (((type << canbus.destination.post.nbits) | despost ) << canbus.destination.board.nbits) | desboard ; 
+            
+            str = str+ "\n";
+            fourthbyte = (((destype << canbus.destination.post.nbits) | despost ) << canbus.destination.board.nbits) | desboard ; 
             console.log(`\x1b[93m${firstbyte.toString(2).padStart(8,'0')} ${secondbyte.toString(2).padStart(8,'0')} ${thirdbyte.toString(2).padStart(8,'0')} ${fourthbyte.toString(2).padStart(8,'0')}\x1b[00m`);
             console.log('\x1b[92m ID: ')
             console.log(Buffer.from([firstbyte,secondbyte,thirdbyte,fourthbyte]));
+            console.log('\x1b[00m');
             console.log(str);
-            console.log('\x1b[00m')
         }
+
+          //10
+          else if (currentPage === 10){
+            selection = await createPage('Done', [ ]);
+            
+            if (selection === 'Back') {
+              currentPage = 8;
+              console.log('backing...');
+            }else{
+            }
+
+          }
             
           
 
