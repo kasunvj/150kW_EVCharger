@@ -139,38 +139,42 @@ async function navigatePages() {
         '0x07',
         '0x08',
         '0x09',
+        '0x0a'
       ]);
     
       if (selection === '0x00') {
-        str = str + "cmd: 00 nc->any, \n";
-        command = Buffer.from([0x00]);
+        str = str + "00 set_ota nc->any, \n";
+        command = canbus.command.set_ota.number;
       } else if (selection === '0x01') {
-        str = str + "cmd: 01 nc->any, \n";
-        command = Buffer.from([0x01]);
+        str = str + "01 set_config nc->any, \n";
+        command = canbus.command.set_config.number.number;
       } else if (selection === '0x02') {
-        str = str + "cmd: 02 pc->cc, \n";
-        command = Buffer.from([0x02]);
+        str = str + "02 set_voltagecurent pc->cc, \n";
+        command = canbus.command.set_voltagecurent.number;
       } else if (selection === '0x03') {
-        str = str + "cmd: 03 pc->cc, \n";
-        command = Buffer.from([0x03]);
+        str = str + "03 command.get_maxvoltage pc->cc, \n";
+        command = canbus.command.get_maxvoltage.number;
       } else if (selection === '0x04') {
-        str = str + "cmd: 04 nc->pc, \n";
-        command = Buffer.from([0x04]);
+        str = str + "04 set_portauth nc->pc, \n";
+        command = canbus.command.set_portauth.number;
       } else if (selection === '0x05') {
-        str = str + "cmd: 05 nc->pc, \n";
-        command = Buffer.from([0x05]);
+        str = str + "05 get_portmesurement nc->pc, \n";
+        command = canbus.command.get_portmesurement.number;
       } else if (selection === '0x06') {
-        str = str + "cmd: 06 cc->tmc, \n";
-        command = Buffer.from([0x06]);
+        str = str + "06 get_tmctemp cc->tmc, \n";
+        command = canbus.command.get_tmctemp.number;
       } else if (selection === '0x07') {
-        str = str + "cmd: 07 ecs->brdc, \n";
-        command = Buffer.from([0x07]);
+        str = str + "07 set_escstate ecs->brdc, \n";
+        command = canbus.command.set_escstate.number;
       }else if (selection === '0x08') {
-        str = str + "cmd: 08 nc->cc, \n";
-        command = Buffer.from([0x08]);
+        str = str + "08 set_maxpower nc->cc, \n";
+        command = canbus.command.set_maxpower.number;
       }else if (selection === '0x09') {
-        str = str + "cmd: 09 pc/cc->brd, \n";
-        command = Buffer.from([0x09]);
+        str = str + "09 set_logdata pc/cc->brd, \n";
+        command = canbus.command.set_logdata.number;
+      }else if (selection === '0x0a') {
+        str = str + "0a net_sync nc->brd, \n";
+        command = canbus.command.net_sync.number;
       }
       
       if (selection === 'Back') {
@@ -182,7 +186,8 @@ async function navigatePages() {
       }
       
 
-      secondbyte = command[0].toString(2);
+      secondbyte = parseInt(command);
+      console.log(">?>",command)
       console.log(`\x1b[93m${firstbyte.toString(2).padStart(8,'0')} ${secondbyte.toString(2).padStart(8,'0')}\x1b[00m`);
       console.log(str);
     }
@@ -439,6 +444,7 @@ async function navigatePages() {
             fourthbyte = (((destype << canbus.destination.post.nbits) | despost ) << canbus.destination.board.nbits) | desboard ; 
             console.log(`\x1b[93m${firstbyte.toString(2).padStart(8,'0')} ${secondbyte.toString(2).padStart(8,'0')} ${thirdbyte.toString(2).padStart(8,'0')} ${fourthbyte.toString(2).padStart(8,'0')}\x1b[00m`);
             console.log('\x1b[92m ID: ')
+            console.log(firstbyte,secondbyte,thirdbyte,fourthbyte);
             console.log(Buffer.from([firstbyte,secondbyte,thirdbyte,fourthbyte]));
             console.log('\x1b[00m');
             console.log(str);

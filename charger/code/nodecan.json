@@ -321,6 +321,22 @@
                 }
             },
             "responce":{}
+        },
+        "net_sync": {
+            "number":10,
+            "reqest":{
+                "multiplexor":{
+                    "dtype":"string",
+                    "startbyte":0,
+                    "endbyte":1
+                },
+                "logData":{
+                    "dtype":"string",
+                    "startbyte":1,
+                    "endbyte":8
+                }
+            },
+            "responce":{}
         }
     },
 
@@ -332,7 +348,7 @@
             "nc":2,
             "tmc":3,
             "esc":4,
-            "brd":5,
+            "brd":7,
             "nbits":3,
             "bitlocation":{
                 "start":0,
@@ -375,7 +391,7 @@
             "nc":2,
             "tmc":3,
             "esc":4,
-            "brd":5,
+            "brd":7,
             "nbits":3,
             "bitlocation":{
                 "start":0,

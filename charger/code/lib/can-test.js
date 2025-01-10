@@ -51,12 +51,12 @@ class CanModule{
         this.posts = [];
         channel.start();
         console.log('CAN channel started.');
-        /*
+        
         channel.addListener('onMessage', (msg) => {
               count++;
               this.decode(msg);
             });
-        */
+        
         }
     
     stop(){
@@ -73,11 +73,9 @@ class CanModule{
         const thirdbyte = ((nodecan["source"]["type"][src] << nodecan.source.post.nbits | 0b00 ) << nodecan.source.board.nbits ) | 0b000;
         const forthbyte = ((nodecan["destination"]["type"][des] << nodecan.destination.post.nbits | 0b00 ) << nodecan.destination.board.nbits) | 0b000;
         
-        const id = Buffer.from([firstbyte.toString(2).padStart(8,'0'),
-            secondbyte.toString(2).padStart(8,'0'),
-            thirdbyte.toString(2).padStart(8,'0'),
-            forthbyte.toString(2).padStart(8,'0')
-        ]);
+
+
+        const id = Buffer.from([firstbyte,secondbyte,thirdbyte,forthbyte]);
         console.log("Out buffer: ",id);
         return id;
     }
@@ -91,16 +89,13 @@ class CanModule{
         console.log(`${type.toString(2).padStart(nodecan.protocol.bits.type,"0")}`);
         console.log(`${errorcode.toString(2).padStart(nodecan.protocol.bits.errorcode,"0")}`);
         console.log(`${command.toString(2).padStart(nodecan.protocol.bits.command,"0")}`);
+        
         message.id = '0x'+ this.assembleId(src,des,type,errorcode,command).toString('hex');
         //message.data = this.assembleData(candata);
         
         channel.send(message);
-        //console.log('Message sent:', message);
     }
     
-    //encodeId(src,dest,type,errorcode,command){
-    //   const srcBitAssembly = src.toString(2).padStart(nodecan.protocol.bits.src,"0")
-    //}
 
     decode(msg){
         /*
@@ -138,7 +133,11 @@ class CanModule{
         const desBoardId = id[nodecan.destination.bytelocation].
                         toString(2).padStart(8,'0').
                             slice(nodecan.destination.board.bitlocation.start,nodecan.destination.board.bitlocation.end);
-                
+        
+        if(command == 10){
+            this.updateCanDeviceTrable(source,sourcePostId,sourceBoardId);
+        }
+
         console.log(`\x1b[92m - - - + - - -\x1b[00m`)
         console.log("type       ",type,getCmmandType(type));
         console.log("error      ",error,getErrType(error));
@@ -150,6 +149,25 @@ class CanModule{
         console.log("   portid  ",desPostId,parseInt(desPostId,2));
         console.log("   boardid ",desBoardId,parseInt(desBoardId,2));
         console.log(`\x1b[92m - - - + - - -\x1b[00m`);
+    }
+
+    updateCanDeviceTrable(){
+        const result_post = this.posts.find(item => item.postid === sourceID.postid);
+        if(result_post){
+            console.log("Post exists");
+        }else{
+            console.log("Post creating");
+            let obj = {
+                postid : sourceID.postid,
+                netcontrollers :[],
+                portcontrollers :[],
+                cabinetcontrollers :[],
+                themalcontrollers :[],
+                envcontrollers :[],
+                //timestamp: new Date().toISOString()
+            };
+            this.posts.push(obj);
+        }
     }
 
 

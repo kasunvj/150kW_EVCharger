@@ -31,6 +31,10 @@ function test_getUserInput(question) {
     });
   }
 
+function delay(ms) {    
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 
 async function dothis(opmode){
     /*
@@ -44,17 +48,24 @@ async function dothis(opmode){
    switch(opmode){
     case 0:
         /*
-        Test mode
+        Input cutom message and decode
         */
-       while(true){
-        const input = await test_getUserInput('id(hex) 12345678: ');
-        msg.id = parseInt(input,16);
-        can.decode(msg);
-       }
+        while(true){
+          const input = await test_getUserInput('id(hex) 12345678: ');
+          msg.id = parseInt(input,16);
+          can.decode(msg);
+        }
 
         break;
     case 1:
-        can.send("nc","pc","request","fault","set_config","");
+        /*
+        Send can messages back to back
+        */
+        while(true){
+          can.send("nc","brd","request","normal","net_sync","");
+          await delay(500);
+        }
+        
         break;
     case 2:
         break;
