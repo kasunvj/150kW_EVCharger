@@ -3,6 +3,7 @@ const can = require('socketcan');
 const channel = can.createRawChannel('can0', true);
 
 count = 0;
+const logginglevel = parseInt(process.argv[3]);
 
 var message = {
     id: 0x123, // CAN ID
@@ -13,12 +14,12 @@ var message = {
 
 function getControlleName(board){
     switch(board){
-        case '000': return `\x1b[92mPC \x1b[00m`;
-        case '001': return `\x1b[92mCC \x1b[00m`;
-        case '010': return `\x1b[92mNC \x1b[00m`;
-        case '011': return `\x1b[92mTMC\x1b[00m`;
-        case '100': return `\x1b[92mESV\x1b[00m`;
-        case '111': return `\x1b[92mBRD\x1b[00m`;
+        case 0: return `\x1b[92mPC \x1b[00m`;
+        case 1: return `\x1b[92mCC \x1b[00m`;
+        case 2: return `\x1b[92mNC \x1b[00m`;
+        case 3: return `\x1b[92mTMC\x1b[00m`;
+        case 4: return `\x1b[92mESV\x1b[00m`;
+        case 7: return `\x1b[92mBRD\x1b[00m`;
     }
 }
 function getCmmandType(board){
@@ -38,6 +39,42 @@ function getErrType(board){
         
     }
 }
+
+function logging(level,color,msg){
+    /**
+     * @param level : logging level. 0: no loggs 1:logging with colours 
+     * @param color : 'y','g',''
+     * @param msg : message
+     */
+
+    let startString = ''
+    let endString = '\x1b[00m'
+    switch(color){
+    case 'y':
+        startString = '\x1b[93m';
+        break;
+    case 'g':
+        startString = '\x1b[92m';
+        break;
+    case 'r':
+        startString = '\x1b[91m';
+        break;
+    default:
+        startString = '';
+
+    }
+    switch(level){
+        case 0:
+            break;
+        case 1:
+            console.log(`${startString}${msg}${endString}`);
+            break;
+        default:
+            console.log(msg);
+            break;
+    }
+}
+
 class CanModule{
     constructor(){
         this.posts = [];
@@ -50,12 +87,12 @@ class CanModule{
         */
         this.posts = [];
         channel.start();
-        console.log('CAN channel started.');
-        
+        logging(logginglevel,'r',"CAN channel started.");
+        /*
         channel.addListener('onMessage', (msg) => {
               count++;
               this.decode(msg);
-            });
+            });*/
         
         }
     
@@ -64,7 +101,7 @@ class CanModule{
         stops the channel
         */
         channel.stop();
-        console.log('CAN channel stopped.');
+        logging(logginglevel,'r',"CAN channel stopped.");
         } 
 
     assembleId(src,des,cmdtype,canerr,cancmd){
@@ -114,25 +151,25 @@ class CanModule{
                         toString(2).padStart(8,'0').
                             slice(nodecan.error.bitlocation.start,nodecan.error.bitlocation.end);
         const command = id[nodecan.command.bytelocation];
-        const source = id[nodecan.source.bytelocation].
+        const source = parseInt(id[nodecan.source.bytelocation].
                         toString(2).padStart(8,'0').
-                            slice(nodecan.source.type.bitlocation.start,nodecan.source.type.bitlocation.end);
-        const sourcePostId = id[nodecan.source.bytelocation].
+                            slice(nodecan.source.type.bitlocation.start,nodecan.source.type.bitlocation.end),2);
+        const sourcePostId = parseInt(id[nodecan.source.bytelocation].
                         toString(2).padStart(8,'0').
-                            slice(nodecan.source.post.bitlocation.start,nodecan.source.post.bitlocation.end);
-        const sourceBoardId = id[nodecan.source.bytelocation].
+                            slice(nodecan.source.post.bitlocation.start,nodecan.source.post.bitlocation.end),2);
+        const sourceBoardId = parseInt(id[nodecan.source.bytelocation].
                         toString(2).padStart(8,'0').
-                            slice(nodecan.source.board.bitlocation.start,nodecan.source.board.bitlocation.end);
+                            slice(nodecan.source.board.bitlocation.start,nodecan.source.board.bitlocation.end),2);
 
-        const destination = id[nodecan.destination.bytelocation].
+        const destination = parseInt(id[nodecan.destination.bytelocation].
                         toString(2).padStart(8,'0').
-                            slice(nodecan.destination.type.bitlocation.start,nodecan.destination.type.bitlocation.end);
-        const desPostId = id[nodecan.destination.bytelocation].
+                            slice(nodecan.destination.type.bitlocation.start,nodecan.destination.type.bitlocation.end),2);
+        const desPostId = parseInt(id[nodecan.destination.bytelocation].
                         toString(2).padStart(8,'0').
-                            slice(nodecan.destination.post.bitlocation.start,nodecan.destination.post.bitlocation.end);
-        const desBoardId = id[nodecan.destination.bytelocation].
+                            slice(nodecan.destination.post.bitlocation.start,nodecan.destination.post.bitlocation.end),2);
+        const desBoardId = parseInt(id[nodecan.destination.bytelocation].
                         toString(2).padStart(8,'0').
-                            slice(nodecan.destination.board.bitlocation.start,nodecan.destination.board.bitlocation.end);
+                            slice(nodecan.destination.board.bitlocation.start,nodecan.destination.board.bitlocation.end),2);
         
         if(command == 10){
             this.updateCanDeviceTrable(source,sourcePostId,sourceBoardId);
@@ -141,32 +178,152 @@ class CanModule{
         console.log(`\x1b[92m - - - + - - -\x1b[00m`)
         console.log("type       ",type,getCmmandType(type));
         console.log("error      ",error,getErrType(error));
-        console.log("command    ",command,parseInt(command,16));
+        console.log("command    ",command);
         console.log("source     ",source,getControlleName(source));
-        console.log("   portid  ",sourcePostId,parseInt(sourcePostId,2));
-        console.log("   boardid ",sourceBoardId,parseInt(sourceBoardId,2));
+        console.log("   portid  ",sourcePostId);
+        console.log("   boardid ",sourceBoardId);
         console.log("destination",destination,getControlleName(destination));
-        console.log("   portid  ",desPostId,parseInt(desPostId,2));
-        console.log("   boardid ",desBoardId,parseInt(desBoardId,2));
+        console.log("   portid  ",desPostId);
+        console.log("   boardid ",desBoardId);
         console.log(`\x1b[92m - - - + - - -\x1b[00m`);
     }
 
-    updateCanDeviceTrable(){
-        const result_post = this.posts.find(item => item.postid === sourceID.postid);
+    updateCanDeviceTrable(source,sourcePostId,sourceBoardId){
+        //checking posts, add new one if not avilable
+        const result_post = this.posts.find(item => item.postid === sourcePostId);
         if(result_post){
-            console.log("Post exists");
+            logging(logginglevel,'r',"post exists");
         }else{
-            console.log("Post creating");
+            logging(logginglevel,'g',"post creating");
             let obj = {
-                postid : sourceID.postid,
+                postid : sourcePostId,
                 netcontrollers :[],
                 portcontrollers :[],
                 cabinetcontrollers :[],
                 themalcontrollers :[],
                 envcontrollers :[],
-                //timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString()
             };
             this.posts.push(obj);
+        }
+
+        const postindex = this.posts.findIndex(item => item.postid === sourcePostId);
+        this.isThisBoardAvilable(postindex,source,sourceBoardId)
+        
+        //adding devices in the post 
+        switch(source){
+            case nodecan.source.type.pc:
+                //port controller
+                if(!this.isThisBoardAvilable(postindex,nodecan.source.type.pc,sourceBoardId)){
+                    let obj = {
+                        count: this.posts[postindex].portcontrollers.length + 1,
+                        boardid: sourceBoardId,
+                        timestamp: new Date().toISOString()
+                    };
+                    this.posts[postindex].portcontrollers.push(obj);
+                    logging(logginglevel,'g',`+ new ${getControlleName(source)} added`);
+                }
+                else{
+                    logging(logginglevel,'r',`${getControlleName(source)} at post ${sourcePostId} board ${sourceBoardId} exists`);
+                }
+                break;
+
+            case nodecan.source.type.cc:
+                //cabinet controller
+                if(!this.isThisBoardAvilable(postindex,nodecan.source.type.cc,sourceBoardId)){
+                    let obj = {
+                        count: this.posts[postindex].cabinetcontrollers.length + 1,
+                        boardid: sourceBoardId,
+                        timestamp: new Date().toISOString()
+                    };
+                    this.posts[postindex].cabinetcontrollers.push(obj);
+                    logging(logginglevel,'g',`+ new ${getControlleName(source)} added`);
+                }
+                else{
+                    logging(logginglevel,'r',`${getControlleName(source)} at post ${sourcePostId} board ${sourceBoardId} exists`);
+                }
+                break;
+
+            case nodecan.source.type.nc:
+                //network controller
+                if(!this.isThisBoardAvilable(postindex,nodecan.source.type.nc,sourceBoardId)){
+                    let obj = {
+                        count: this.posts[postindex].netcontrollers.length + 1,
+                        boardid: sourceBoardId,
+                        timestamp: new Date().toISOString()
+                    };
+                    this.posts[postindex].netcontrollers.push(obj);
+                    logging(logginglevel,'g',`+ new ${getControlleName(source)} added`);
+                }
+                else{
+                    logging(logginglevel,'r',`${getControlleName(source)} at post ${sourcePostId} board ${sourceBoardId} exists`);
+                }
+                break;
+
+            case nodecan.source.type.tmc:
+                //themal controller
+                if(!this.isThisBoardAvilable(postindex,nodecan.source.type.tmc,sourceBoardId)){
+                    let obj = {
+                        count: this.posts[postindex].themalcontrollers.length + 1,
+                        boardid: sourceBoardId,
+                        timestamp: new Date().toISOString()
+                    };
+                    this.posts[postindex].themalcontrollers.push(obj);
+                    logging(logginglevel,'g',`+ new ${getControlleName(source)} added`);
+                }
+                else{
+                    logging(logginglevel,'r',`${getControlleName(source)} at post ${sourcePostId} board ${sourceBoardId} exists`);
+                }
+                break;
+
+            case nodecan.source.type.esc:
+                //envioment controller
+                if(!this.isThisBoardAvilable(postindex,nodecan.source.type.esc,sourceBoardId)){
+                    let obj = {
+                        count: this.posts[postindex].envcontrollers.length + 1,
+                        boardid: sourceBoardId,
+                        timestamp: new Date().toISOString()
+                    };
+                    this.posts[postindex].envcontrollers.push(obj);
+                    logging(logginglevel,'g',`+ new ${getControlleName(source)} added`);
+                }
+                else{
+                    logging(logginglevel,'r',`${getControlleName(source)} at post ${sourcePostId} board ${sourceBoardId} exists`);
+                }
+                break;
+            default :
+                logging(logginglevel,'r',`node post to add or sync ${source}`)
+
+        }
+        console.log(this.posts);
+        const jsonData = JSON.stringify(cantree, null, 2)
+
+        fs.writeFile('can-tree.json', jsonData, (err) => {
+            if (err) {
+              console.error('Error writing JSON file:', err);
+            } else {
+              console.log('JSON file created successfully: output.json');
+            }
+          });
+
+        
+    }
+
+    isThisBoardAvilable(postindex,src,sourceBoardId){
+
+        switch(src){
+            case nodecan.source.type.pc:
+                return this.posts[postindex].portcontrollers.find(item => item.boardid === sourceBoardId);
+            case nodecan.source.type.nc:
+                return this.posts[postindex].netcontrollers.find(item => item.boardid === sourceBoardId); 
+            case nodecan.source.type.cc:
+                return this.posts[postindex].cabinetcontrollers.find(item => item.boardid === sourceBoardId); 
+            case nodecan.source.type.esc:
+                return this.posts[postindex].envcontrollers.find(item => item.boardid === sourceBoardId);
+            case nodecan.source.type.tmc:
+                return this.posts[postindex].themalcontrollers.find(item => item.boardid === sourceBoardId);
+            default:
+                return false;
         }
     }
 

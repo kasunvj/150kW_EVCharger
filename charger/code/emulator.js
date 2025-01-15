@@ -187,7 +187,6 @@ async function navigatePages() {
       
 
       secondbyte = parseInt(command);
-      console.log(">?>",command)
       console.log(`\x1b[93m${firstbyte.toString(2).padStart(8,'0')} ${secondbyte.toString(2).padStart(8,'0')}\x1b[00m`);
       console.log(str);
     }
@@ -398,8 +397,6 @@ async function navigatePages() {
             currentPage = 9;
           }
 
-          str = str+ "\n";
-          
         }
 
           //9
@@ -446,8 +443,8 @@ async function navigatePages() {
             console.log('\x1b[92m ID: ')
             console.log(firstbyte,secondbyte,thirdbyte,fourthbyte);
             console.log(Buffer.from([firstbyte,secondbyte,thirdbyte,fourthbyte]));
-            console.log('\x1b[00m');
             console.log(str);
+            console.log('\x1b[00m');
         }
 
           //10

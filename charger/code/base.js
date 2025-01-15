@@ -2,7 +2,7 @@ const { CanModule } = require('./lib/can-test.js');
 const canbus = require('./nodecan.json');
 const { logger } = require('./lib/log.js');
 const can = new CanModule();
-const opmode = 0;
+const opmode = parseInt(process.argv[2]);
 
 const readline = require('readline');
 
