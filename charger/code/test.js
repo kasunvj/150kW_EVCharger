@@ -1,16 +1,23 @@
+const Ajv = require("ajv")
+const ajv = new Ajv() // options can be passed, e.g. {allErrors: true}
 
-const canbus = require('./nodecan.json');
-input = "a";
-
-msg = {"A":1,
-    "B":{
-        "a":20,
-        "b":21
-    },
-    "C":3
+const schema = {
+  type: "object",
+  properties: {
+    foo: {type: "integer"},
+    bar: {type: "string"}
+  },
+  required: ["foo"],
+  additionalProperties: false
 }
 
-function myfun(input){
-    console.log(msg["B"][input])
+const validate = ajv.compile(schema)
+
+const data = {
+  foo: 1,
+  bar: "abc"
 }
-myfun(input);
+
+const valid = validate(data)
+if (!valid) console.log(validate.errors)
+    else console.log("success")

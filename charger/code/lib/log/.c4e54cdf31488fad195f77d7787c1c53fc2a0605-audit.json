@@ -6,31 +6,6 @@
     "auditLog": "/home/vegaav/150kW_EVCharger/charger/code/lib/log/.c4e54cdf31488fad195f77d7787c1c53fc2a0605-audit.json",
     "files": [
         {
-            "date": 1735560474168,
-            "name": "/home/vegaav/150kW_EVCharger/charger/code/lib/log/S0001-2024-12-30_17.log",
-            "hash": "c85029d59c038ba731eb86da3e6b367b1de06937402bb7a67e4e122768274826"
-        },
-        {
-            "date": 1735628654947,
-            "name": "/home/vegaav/150kW_EVCharger/charger/code/lib/log/S0001-2024-12-31_12.log",
-            "hash": "82b58c21822ac53c37b674f1a7a2c0ef84670c8c91cb51eb66cdd445f704a11a"
-        },
-        {
-            "date": 1735729340250,
-            "name": "/home/vegaav/150kW_EVCharger/charger/code/lib/log/S0001-2025-01-01_16.log",
-            "hash": "899bd84e282a75fb7451b78fd374845fa06e8a12068c489b27ff4a0fdfa0b913"
-        },
-        {
-            "date": 1735797385673,
-            "name": "/home/vegaav/150kW_EVCharger/charger/code/lib/log/S0001-2025-01-02_11.log",
-            "hash": "097347d697d1d1a95dbf7d8014e5e7ce11e363029b435349c49e8f7518bf3687"
-        },
-        {
-            "date": 1735898424747,
-            "name": "/home/vegaav/150kW_EVCharger/charger/code/lib/log/S0001-2025-01-03_15.log",
-            "hash": "b85531a9587f40abdf5f971b972cb1cf91ec4288b3203e8b36c365f0e8bbca7f"
-        },
-        {
             "date": 1735902627132,
             "name": "/home/vegaav/150kW_EVCharger/charger/code/lib/log/S0001-2025-01-03_16.log",
             "hash": "c7df2ffcc5f4b97f0cd9adfa5dd74f034521e63d5066384a70a4e7dc4b257254"
@@ -124,6 +99,31 @@
             "date": 1736936234896,
             "name": "/home/vegaav/150kW_EVCharger/charger/code/lib/log/S0001-2025-01-15_15.log",
             "hash": "d9d2a85f1da71b7fe4ddab9ab85d47fafdc2065360b5fe79b3589213f85bdb0e"
+        },
+        {
+            "date": 1737000486161,
+            "name": "/home/vegaav/150kW_EVCharger/charger/code/lib/log/S0001-2025-01-16_09.log",
+            "hash": "dcbe09db8c8525e525ae1f99a5723f3362dbe1241546a30ef23f66a0fa1fe84d"
+        },
+        {
+            "date": 1737087864879,
+            "name": "/home/vegaav/150kW_EVCharger/charger/code/lib/log/S0001-2025-01-17_09.log",
+            "hash": "79160fd0fe0cc0efc838c0bbf2238445874f14deee1edf6f617c24b5990ff1ad"
+        },
+        {
+            "date": 1737089617436,
+            "name": "/home/vegaav/150kW_EVCharger/charger/code/lib/log/S0001-2025-01-17_10.log",
+            "hash": "d1ba6167444e15961acda72612bc6d4322a0826d9ae7812c4d181f8e3424c2ad"
+        },
+        {
+            "date": 1737108978988,
+            "name": "/home/vegaav/150kW_EVCharger/charger/code/lib/log/S0001-2025-01-17_15.log",
+            "hash": "1c6fb6f01ef1159c605e99536aeeae8cdad27d384b98d6b82ac6dd29406374a1"
+        },
+        {
+            "date": 1737110276940,
+            "name": "/home/vegaav/150kW_EVCharger/charger/code/lib/log/S0001-2025-01-17_16.log",
+            "hash": "9e2f3121fe82628da1f38231c3259d728c8f234291569f9eca68308f9938b948"
         }
     ],
     "hashType": "sha256"

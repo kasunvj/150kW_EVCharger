@@ -1,0 +1,63 @@
+[
+  {
+    "postid": 0,
+    "netcontrollers": [],
+    "portcontrollers": [],
+    "cabinetcontrollers": [
+      {
+        "count": 1,
+        "boardid": 1,
+        "timestamp": "2025-01-16T04:12:57.705Z"
+      },
+      {
+        "count": 2,
+        "boardid": 2,
+        "timestamp": "2025-01-16T04:20:20.236Z"
+      },
+      {
+        "count": 3,
+        "boardid": 0,
+        "timestamp": "2025-01-16T04:27:08.133Z"
+      }
+    ],
+    "themalcontrollers": [],
+    "envcontrollers": [],
+    "timestamp": "2025-01-16T04:12:57.704Z"
+  },
+  {
+    "postid": 3,
+    "netcontrollers": [],
+    "portcontrollers": [],
+    "cabinetcontrollers": [
+      {
+        "count": 1,
+        "boardid": 3,
+        "timestamp": "2025-01-16T06:51:30.265Z"
+      }
+    ],
+    "themalcontrollers": [],
+    "envcontrollers": [
+      {
+        "count": 1,
+        "boardid": 0,
+        "timestamp": "2025-01-16T04:15:16.205Z"
+      }
+    ],
+    "timestamp": "2025-01-16T04:15:16.205Z"
+  },
+  {
+    "postid": 1,
+    "netcontrollers": [],
+    "portcontrollers": [],
+    "cabinetcontrollers": [],
+    "themalcontrollers": [],
+    "envcontrollers": [
+      {
+        "count": 1,
+        "boardid": 0,
+        "timestamp": "2025-01-16T04:25:44.284Z"
+      }
+    ],
+    "timestamp": "2025-01-16T04:25:44.284Z"
+  }
+]

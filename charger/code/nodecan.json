@@ -47,7 +47,7 @@
         "bytelocation":1,
         "set_ota": {
             "number":0,
-            "reqest":{},
+            "request":{},
             "responce":{}
         },
         "set_config": {
@@ -57,7 +57,7 @@
         },
         "set_voltagecurent": {
             "number":2,
-            "reqest":{
+            "request":{
                 "action":{
                     "dtype":"string",
                     "startbyte":0,
@@ -124,7 +124,7 @@
         },
         "get_maxvoltage": {
             "number":3,
-            "reqest":{},
+            "request":{},
             "responce":{
                 "maxPower":{
                     "dtype":"string",
@@ -145,7 +145,7 @@
         },
         "set_portauth": {
             "number":4,
-            "reqest":{
+            "request":{
                 "chargingState":{
                     "dtype":"string",
                     "startbyte":0,
@@ -192,7 +192,7 @@
         },
         "get_portmesurement": {
             "number":5,
-            "reqest":{},
+            "request":{},
             "responce":{
                "accEnergy":{
                     "dtype":"string",
@@ -208,7 +208,7 @@
         },
         "get_tmctemp": {
             "number":6,
-            "reqest":{
+            "request":{
                 "CCState":{
                     "dtype":"string",
                     "startbyte":0,
@@ -250,7 +250,7 @@
         },
         "set_escstate": {
             "number":7,
-            "reqest":{
+            "request":{
                 "errorCode1":{
                     "dtype":"string",
                     "startbyte":0,
@@ -276,7 +276,7 @@
         },
         "set_maxpower": {
             "number":8,
-            "reqest":{
+            "request":{
                 "maxPowerLimit":{
                     "dtype":"string",
                     "startbyte":4,
@@ -308,7 +308,7 @@
         },
         "set_logdata": {
             "number":9,
-            "reqest":{
+            "request":{
                 "multiplexor":{
                     "dtype":"string",
                     "startbyte":0,
@@ -324,7 +324,7 @@
         },
         "net_sync": {
             "number":10,
-            "reqest":{
+            "request":{
                 "multiplexor":{
                     "dtype":"string",
                     "startbyte":0,
@@ -360,8 +360,6 @@
             "post1":1,
             "post2":2,
             "post3":3,
-            "post4":4,
-            "post5":5,
             "nbits":2,
             "bitlocation":{
                 "start":3,
@@ -375,6 +373,9 @@
             "board3":3,
             "board4":4,
             "board5":5,
+            "board6":6,
+            "board7":7,
+            "board8":8,
             "nbits":3,
             "bitlocation":{
                 "start":5,
@@ -403,8 +404,6 @@
             "post1":1,
             "post2":2,
             "post3":3,
-            "post4":4,
-            "post5":5,
             "nbits":2,
             "bitlocation":{
                 "start":3,
@@ -418,6 +417,9 @@
             "board3":3,
             "board4":4,
             "board5":5,
+            "board6":6,
+            "board7":7,
+            "board8":8,
             "nbits":3,
             "bitlocation":{
                 "start":5,

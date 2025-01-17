@@ -1,3 +1,14 @@
+/**
+ * @par base.js 
+ * @param operation_mode
+ *            0: request user input for messages
+ *            1: sending predefiend can message
+ *            2: test cases 
+ * @param log_level
+ *            0: no logs
+ *            1: colord logs
+ */
+
 const { CanModule } = require('./lib/can-test.js');
 const canbus = require('./nodecan.json');
 const { logger } = require('./lib/log.js');
@@ -68,6 +79,9 @@ async function dothis(opmode){
         
         break;
     case 2:
+        /*
+        Test Mode
+        */ 
         break;
    }
 

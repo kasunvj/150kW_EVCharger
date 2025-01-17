@@ -193,7 +193,7 @@ async function navigatePages() {
 
     //4
     else if (currentPage === 4) {
-        selection = await createPage('Source - Controller Type)-', [
+        selection = await createPage('(source)Controller Type-', [
           'Port Controller',
           'Cabinet Controller',
           'Network Controller',
@@ -229,18 +229,16 @@ async function navigatePages() {
           currentPage = 5;
         }
 
-        str = str+ "\n";
+        console.log("(s)type:",sourcetype);
       }
       
       //5
       else if (currentPage === 5){
-        selection = await createPage('Post No', [
+        selection = await createPage('(source)Post No', [
           '00',
           '01',
           '02',
-          '03',
-          '04',
-          '05'
+          '03'
         ]);
 
         if(selection === '00'){
@@ -255,12 +253,6 @@ async function navigatePages() {
         }else if(selection === '03'){
           str = str+ "  post 03, ";
           sourcepost = canbus.source.post.post3;
-        }else if(selection === '04'){
-          str = str+ "  post 04, ";
-          sourcepost = canbus.source.post.post4;
-        }else if(selection === '05'){
-          str = str+ "  post 05, ";
-          sourcepost = canbus.source.post.post5;
         }
         
         if (selection === 'Back') {
@@ -270,17 +262,21 @@ async function navigatePages() {
           currentPage = 6;
         }
 
+        console.log(" (s)post:",sourcepost);
+
       }
 
         //6
         else if (currentPage === 6){
-          selection = await createPage('Board No', [
+          selection = await createPage('(source)Board No', [
             '00',
             '01',
             '02',
             '03',
             '04',
-            '05'
+            '05',
+            '06',
+            '07'
           ]);
   
           if(selection === '00'){
@@ -301,6 +297,12 @@ async function navigatePages() {
           }else if(selection === '05'){
             str = str+ "  board 05, ";
             sourceboard = canbus.source.board.board5;
+          }else if(selection === '06'){
+            str = str+ "  board 06, ";
+            sourceboard = canbus.source.board.board6;
+          }else if(selection === '07'){
+            str = str+ "  board 07, ";
+            sourceboard = canbus.source.board.board7;
           }
           
           if (selection === 'Back') {
@@ -310,7 +312,7 @@ async function navigatePages() {
             currentPage = 7; 
           }
           
-
+          console.log(" (s)board:",sourceboard);
 
           thirdbyte = (((sourcetype << canbus.source.post.nbits) | sourcepost ) << canbus.source.board.nbits) | sourceboard ; 
           console.log(`\x1b[93m${firstbyte.toString(2).padStart(8,'0')} ${secondbyte.toString(2).padStart(8,'0')} ${thirdbyte.toString(2).padStart(8,'0')}\x1b[00m`)
@@ -318,7 +320,7 @@ async function navigatePages() {
 
         //7
         else if (currentPage === 7) {
-          selection = await createPage('Destination -Controller Type', [
+          selection = await createPage('(des)Controller Type', [
             'Port Controller',
             'Cabinet Controller',
             'Network Controller',
@@ -327,7 +329,6 @@ async function navigatePages() {
             'Broadcast',
           ]);
 
-          str = str+ "\n";
         
           if (selection === 'Port Controller') {
             str = str+ "(des)pc, ";
@@ -356,18 +357,16 @@ async function navigatePages() {
             currentPage = 8;
           }
           
-          str = str+ "\n";
+          console.log(" (d)type:",destype);
         }
 
         //8
         else if (currentPage === 8){
-          selection = await createPage('Post No', [
+          selection = await createPage('(des)Post No', [
             '00',
             '01',
             '02',
-            '03',
-            '04',
-            '05'
+            '03'
           ]);
 
           if(selection === '00'){
@@ -382,12 +381,6 @@ async function navigatePages() {
           }else if(selection === '03'){
             str = str+ "  post 03, ";
             despost = canbus.destination.post.post3;
-          }else if(selection === '04'){
-            str = str+ "  post 04, ";
-            despost = canbus.destination.post.post4;
-          }else if(selectSelectedion === '05'){
-            str = str+ "  post 05, ";
-            despost = canbus.destination.post.post5;
           }
           
           if (selection === 'Back') {
@@ -397,17 +390,21 @@ async function navigatePages() {
             currentPage = 9;
           }
 
+          console.log(" (d)post:",despost);
+
         }
 
           //9
           else if (currentPage === 9){
-            selection = await createPage('Board No', [
+            selection = await createPage('(des)Board No', [
               '00',
               '01',
               '02',
               '03',
               '04',
-              '05'
+              '05',
+              '06',
+              '07'
             ]);
     
             if(selection === '00'){
@@ -428,6 +425,12 @@ async function navigatePages() {
             }else if(selection === '05'){
               str = str+ "  board 05, ";
               desboard = canbus.destination.board.board5;
+            }else if(selection === '06'){
+              str = str+ "  board 06, ";
+              desboard = canbus.destination.board.board6;
+            }else if(selection === '07'){
+              str = str+ "  board 07, ";
+              desboard = canbus.destination.board.board7;
             }
             if (selection === 'Back') {
               currentPage = 8;
@@ -436,6 +439,8 @@ async function navigatePages() {
             else{
               currentPage = 10;
             }
+
+            console.log(" (d)board:",desboard);
             
             str = str+ "\n";
             fourthbyte = (((destype << canbus.destination.post.nbits) | despost ) << canbus.destination.board.nbits) | desboard ; 

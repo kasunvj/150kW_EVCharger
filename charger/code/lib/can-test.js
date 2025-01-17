@@ -1,8 +1,10 @@
 const nodecan = require('../nodecan.json');
 const can = require('socketcan');
 const channel = can.createRawChannel('can0', true);
+const fs = require('fs');
 
 count = 0;
+const opmode = parseInt(process.argv[2]);
 const logginglevel = parseInt(process.argv[3]);
 
 var message = {
@@ -87,12 +89,20 @@ class CanModule{
         */
         this.posts = [];
         channel.start();
-        logging(logginglevel,'r',"CAN channel started.");
-        /*
-        channel.addListener('onMessage', (msg) => {
-              count++;
-              this.decode(msg);
-            });*/
+        
+        switch(opmode){
+            case 2:
+                logging(logginglevel,'r',`CAN channel started in test mode.\n   In this mode, can will not listen in to actual can bus.\n   Test messges directly redirect to decode `);
+                break;
+            default:
+                logging(logginglevel,'r',"CAN channel started and listening.");
+                channel.addListener('onMessage', (msg) => {
+                    count++;
+                    this.decode(msg);
+                  });
+                break;
+        }
+        
         
         }
     
@@ -175,7 +185,7 @@ class CanModule{
             this.updateCanDeviceTrable(source,sourcePostId,sourceBoardId);
         }
 
-        console.log(`\x1b[92m - - - + - - -\x1b[00m`)
+        console.log(`\x1b[92m - - - + ${count} -\x1b[00m`)
         console.log("type       ",type,getCmmandType(type));
         console.log("error      ",error,getErrType(error));
         console.log("command    ",command);
@@ -296,14 +306,13 @@ class CanModule{
 
         }
         console.log(this.posts);
-        const jsonData = JSON.stringify(cantree, null, 2)
+        
+        const jsonData = JSON.stringify(this.posts, null, 2);
 
-        fs.writeFile('can-tree.json', jsonData, (err) => {
+        fs.writeFile('canlist.json', jsonData, (err) => {
             if (err) {
               console.error('Error writing JSON file:', err);
-            } else {
-              console.log('JSON file created successfully: output.json');
-            }
+            } 
           });
 
         
