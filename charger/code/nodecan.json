@@ -19,7 +19,7 @@
 
     "type":{
         "request": 0,
-        "responce":1,
+        "response":1,
         "nbits":2,
         "bytelocation":0,
         "bitlocation":{

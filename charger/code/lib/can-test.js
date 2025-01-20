@@ -45,7 +45,7 @@ function getErrType(board){
 function logging(level,color,msg){
     /**
      * @param level : logging level. 0: no loggs 1:logging with colours 
-     * @param color : 'y','g',''
+     * @param color : 'y','g','r'
      * @param msg : message
      */
 
@@ -114,22 +114,42 @@ class CanModule{
         logging(logginglevel,'r',"CAN channel stopped.");
         } 
 
-    assembleId(src,des,cmdtype,canerr,cancmd){
-        const firstbyte = nodecan["type"][cmdtype] << nodecan.error.nbits | nodecan["error"][canerr];
-        const secondbyte = nodecan["command"][cancmd]["number"];
-        const thirdbyte = ((nodecan["source"]["type"][src] << nodecan.source.post.nbits | 0b00 ) << nodecan.source.board.nbits ) | 0b000;
-        const forthbyte = ((nodecan["destination"]["type"][des] << nodecan.destination.post.nbits | 0b00 ) << nodecan.destination.board.nbits) | 0b000;
-        
+    encode(src,srcpid,srcbid,des,despid,desbid,cmdtype,canerr,cancmd){
+        /**
+         * @param src : source (string)
+         * @param srcpid : source post id (int)
+         * @param srcbid : source board id (int)
+         * @param des : destination (string)
+         * @param despid : destination post id (int)
+         * @param desbid : destination baord id (int)
+         * @param cmdtype : command type string 
+         * @param canerr :can error string
+         * @param cancmd : command string
+         * @returns CAN ID buffer
+         */
 
+        let firstbyte = 0;
+        let secondbyte = 0;
+        let thirdbyte = 0;
+        let forthbyte = 0;
 
+        if ((srcpid < 0)||(srcpid > 3)) logging(logginglevel,'r',"Source post id out of range");
+        else if ((srcbid < 0)||(srcbid > 7)) logging(logginglevel,'r',"Source board id out of range"); 
+        else if ((despid < 0)||(despid > 3)) logging(logginglevel,'r',"Destination post id out of range");
+        else if ((desbid < 0)||(desbid > 7)) logging(logginglevel,'r',"Destination board id out of range");
+        else{
+        firstbyte = nodecan["type"][cmdtype] << nodecan.error.nbits | nodecan["error"][canerr];
+        secondbyte = nodecan["command"][cancmd]["number"];
+        thirdbyte = ((nodecan["source"]["type"][src] << nodecan.source.post.nbits | srcpid ) << nodecan.source.board.nbits ) | srcbid;
+        forthbyte = ((nodecan["destination"]["type"][des] << nodecan.destination.post.nbits | despid ) << nodecan.destination.board.nbits) | desbid;
+        }
         const id = Buffer.from([firstbyte,secondbyte,thirdbyte,forthbyte]);
-        console.log("Out buffer: ",id);
         return id;
     }
 
-    send(src,des,type,errorcode,command,candata){
-        /*
-        srcaddr: 'String' Source address. 
+    send(src,srcpid,srcbid,des,despid,desbid,type,errorcode,command,candata){
+        /**
+         * @param src : 
         */
         console.log(`${src.toString(2).padStart(nodecan.protocol.bits.src,"0")}`);
         console.log(`${des.toString(2).padStart(nodecan.protocol.bits.des,"0")}`);
@@ -137,7 +157,7 @@ class CanModule{
         console.log(`${errorcode.toString(2).padStart(nodecan.protocol.bits.errorcode,"0")}`);
         console.log(`${command.toString(2).padStart(nodecan.protocol.bits.command,"0")}`);
         
-        message.id = '0x'+ this.assembleId(src,des,type,errorcode,command).toString('hex');
+        message.id = '0x'+ this.encode(src,srcpid,srcbid,des,despid,desbid,type,errorcode,command).toString('hex');
         //message.data = this.assembleData(candata);
         
         channel.send(message);
@@ -145,10 +165,11 @@ class CanModule{
     
 
     decode(msg){
-        /*
-        identifire - 29 bits (4 bytes)
-        data - 8 bytes
-        */
+        /**
+         * @param msg : can meesage object with id,data members 
+         * @returns
+         */
+        
         var id = Buffer.alloc(4);
         id = Buffer.from(msg.id.toString(16).padStart(8,'0'),'hex');
         console.log("messge id:",msg.id);
@@ -196,7 +217,13 @@ class CanModule{
         console.log("   portid  ",desPostId);
         console.log("   boardid ",desBoardId);
         console.log(`\x1b[92m - - - + - - -\x1b[00m`);
+
+        var testSet = Buffer.from([source,sourcePostId,sourceBoardId,destination,desPostId,desBoardId,type,error,command]);
+        return testSet;
+
+        
     }
+
 
     updateCanDeviceTrable(source,sourcePostId,sourceBoardId){
         //checking posts, add new one if not avilable
@@ -227,8 +254,7 @@ class CanModule{
                 if(!this.isThisBoardAvilable(postindex,nodecan.source.type.pc,sourceBoardId)){
                     let obj = {
                         count: this.posts[postindex].portcontrollers.length + 1,
-                        boardid: sourceBoardId,
-                        timestamp: new Date().toISOString()
+                        boardid: sourceBoardId
                     };
                     this.posts[postindex].portcontrollers.push(obj);
                     logging(logginglevel,'g',`+ new ${getControlleName(source)} added`);
@@ -243,8 +269,7 @@ class CanModule{
                 if(!this.isThisBoardAvilable(postindex,nodecan.source.type.cc,sourceBoardId)){
                     let obj = {
                         count: this.posts[postindex].cabinetcontrollers.length + 1,
-                        boardid: sourceBoardId,
-                        timestamp: new Date().toISOString()
+                        boardid: sourceBoardId
                     };
                     this.posts[postindex].cabinetcontrollers.push(obj);
                     logging(logginglevel,'g',`+ new ${getControlleName(source)} added`);
@@ -259,8 +284,7 @@ class CanModule{
                 if(!this.isThisBoardAvilable(postindex,nodecan.source.type.nc,sourceBoardId)){
                     let obj = {
                         count: this.posts[postindex].netcontrollers.length + 1,
-                        boardid: sourceBoardId,
-                        timestamp: new Date().toISOString()
+                        boardid: sourceBoardId
                     };
                     this.posts[postindex].netcontrollers.push(obj);
                     logging(logginglevel,'g',`+ new ${getControlleName(source)} added`);
@@ -275,8 +299,7 @@ class CanModule{
                 if(!this.isThisBoardAvilable(postindex,nodecan.source.type.tmc,sourceBoardId)){
                     let obj = {
                         count: this.posts[postindex].themalcontrollers.length + 1,
-                        boardid: sourceBoardId,
-                        timestamp: new Date().toISOString()
+                        boardid: sourceBoardId
                     };
                     this.posts[postindex].themalcontrollers.push(obj);
                     logging(logginglevel,'g',`+ new ${getControlleName(source)} added`);
@@ -291,8 +314,7 @@ class CanModule{
                 if(!this.isThisBoardAvilable(postindex,nodecan.source.type.esc,sourceBoardId)){
                     let obj = {
                         count: this.posts[postindex].envcontrollers.length + 1,
-                        boardid: sourceBoardId,
-                        timestamp: new Date().toISOString()
+                        boardid: sourceBoardId
                     };
                     this.posts[postindex].envcontrollers.push(obj);
                     logging(logginglevel,'g',`+ new ${getControlleName(source)} added`);
@@ -305,7 +327,7 @@ class CanModule{
                 logging(logginglevel,'r',`node post to add or sync ${source}`)
 
         }
-        console.log(this.posts);
+        //console.log(this.posts);
         
         const jsonData = JSON.stringify(this.posts, null, 2);
 

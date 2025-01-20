@@ -1,3 +1,14 @@
 {
-        "messages":[["nc","brd","request","normal","net_sync",""]]
+        "messages":[
+        ["nc",0,0,"brd",0,0,"request","normal","net_sync",""],
+        ["pc",0,0,"nc",0,0,"response","normal","net_sync",""],
+        ["pc",2,6,"nc",0,0,"response","normal","net_sync",""],
+        ["cc",3,0,"nc",0,0,"response","normal","net_sync",""],
+        ["cc",0,1,"nc",0,0,"response","normal","net_sync",""],
+        ["cc",2,3,"nc",0,0,"response","normal","net_sync",""],
+        ["cc",0,0,"nc",0,0,"response","normal","net_sync",""],
+        ["cc",0,3,"nc",0,0,"response","normal","net_sync",""],
+        ["cc",3,3,"nc",0,0,"response","normal","net_sync",""],
+        ["cc",0,3,"nc",0,0,"response","normal","net_sync",""]
+]
 }     

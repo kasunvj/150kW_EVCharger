@@ -6,41 +6,6 @@
     "auditLog": "/home/vegaav/150kW_EVCharger/charger/code/lib/log/.c4e54cdf31488fad195f77d7787c1c53fc2a0605-audit.json",
     "files": [
         {
-            "date": 1735902627132,
-            "name": "/home/vegaav/150kW_EVCharger/charger/code/lib/log/S0001-2025-01-03_16.log",
-            "hash": "c7df2ffcc5f4b97f0cd9adfa5dd74f034521e63d5066384a70a4e7dc4b257254"
-        },
-        {
-            "date": 1736144136183,
-            "name": "/home/vegaav/150kW_EVCharger/charger/code/lib/log/S0001-2025-01-06_11.log",
-            "hash": "3a44a8675a1498d76b9178e95b8ff28e6cf74989cc4158a0097ef4559ea11274"
-        },
-        {
-            "date": 1736319313354,
-            "name": "/home/vegaav/150kW_EVCharger/charger/code/lib/log/S0001-2025-01-08_12.log",
-            "hash": "9ec3191a936744428343faf73e58a070bad7395d933214b241f2689454909507"
-        },
-        {
-            "date": 1736328786951,
-            "name": "/home/vegaav/150kW_EVCharger/charger/code/lib/log/S0001-2025-01-08_15.log",
-            "hash": "78146302372df7c8e2d7a1f7aa0b64361582bb0a270579f1463c1b95204decf1"
-        },
-        {
-            "date": 1736414584954,
-            "name": "/home/vegaav/150kW_EVCharger/charger/code/lib/log/S0001-2025-01-09_14.log",
-            "hash": "3256582dc4d2f5a9b3061aa6d57608268d6eca37e5c8d4d1116a4b55b852b783"
-        },
-        {
-            "date": 1736415288168,
-            "name": "/home/vegaav/150kW_EVCharger/charger/code/lib/log/S0001-2025-01-09_15.log",
-            "hash": "1c2a91b4e6fbd85eba229343e73cd81daf9faa825e480fa5ec9010cbe1998155"
-        },
-        {
-            "date": 1736420759868,
-            "name": "/home/vegaav/150kW_EVCharger/charger/code/lib/log/S0001-2025-01-09_16.log",
-            "hash": "72eb6b41285d4860674e58a713ff9f25a3179b66331b22d3635e0812a1f16da2"
-        },
-        {
             "date": 1736422209635,
             "name": "/home/vegaav/150kW_EVCharger/charger/code/lib/log/S0001-2025-01-09_17.log",
             "hash": "3f981e103be61a386fdd2907da9cdbdd23a44b1046926c2d8c0b8924471afeac"
@@ -124,6 +89,41 @@
             "date": 1737110276940,
             "name": "/home/vegaav/150kW_EVCharger/charger/code/lib/log/S0001-2025-01-17_16.log",
             "hash": "9e2f3121fe82628da1f38231c3259d728c8f234291569f9eca68308f9938b948"
+        },
+        {
+            "date": 1737346928715,
+            "name": "/home/vegaav/150kW_EVCharger/charger/code/lib/log/S0001-2025-01-20_09.log",
+            "hash": "b2ffd9a0ce1cd90ff2129aa200f1758291fe8abcc1e00790972b71222970f1a8"
+        },
+        {
+            "date": 1737349537993,
+            "name": "/home/vegaav/150kW_EVCharger/charger/code/lib/log/S0001-2025-01-20_10.log",
+            "hash": "14e8906a390817ef75e112011ae57e92a888d03ed82666fc42ed5708e567f0d2"
+        },
+        {
+            "date": 1737354367679,
+            "name": "/home/vegaav/150kW_EVCharger/charger/code/lib/log/S0001-2025-01-20_11.log",
+            "hash": "3f4fe79b9330dc030896af0ae5956f397914b8a0099ec7f94c9e26ed61d56115"
+        },
+        {
+            "date": 1737356704984,
+            "name": "/home/vegaav/150kW_EVCharger/charger/code/lib/log/S0001-2025-01-20_12.log",
+            "hash": "aed80f1a04c0eafd74af6cbd757f479362b69a44e48fb772c676c6de2b20650b"
+        },
+        {
+            "date": 1737358395109,
+            "name": "/home/vegaav/150kW_EVCharger/charger/code/lib/log/S0001-2025-01-20_13.log",
+            "hash": "e457193ec9a8befd1c944ff899bc3179ce614ec576830cfbff2bde8bd5c8a44a"
+        },
+        {
+            "date": 1737370284396,
+            "name": "/home/vegaav/150kW_EVCharger/charger/code/lib/log/S0001-2025-01-20_16.log",
+            "hash": "5b03f2e0118ef8d071bdc1a716f65d10290fdd5114877f40194531907db82a33"
+        },
+        {
+            "date": 1737372745046,
+            "name": "/home/vegaav/150kW_EVCharger/charger/code/lib/log/S0001-2025-01-20_17.log",
+            "hash": "9bf95618dd4e1153e02020f6bc239f546cceb6688abdf5b3ac787afa9a2f4ae0"
         }
     ],
     "hashType": "sha256"

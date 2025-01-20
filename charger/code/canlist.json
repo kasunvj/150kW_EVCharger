@@ -1,28 +1,54 @@
 [
   {
     "postid": 0,
-    "netcontrollers": [],
-    "portcontrollers": [],
+    "netcontrollers": [
+      {
+        "count": 1,
+        "boardid": 0
+      }
+    ],
+    "portcontrollers": [
+      {
+        "count": 1,
+        "boardid": 0
+      }
+    ],
     "cabinetcontrollers": [
       {
         "count": 1,
-        "boardid": 1,
-        "timestamp": "2025-01-16T04:12:57.705Z"
+        "boardid": 1
       },
       {
         "count": 2,
-        "boardid": 2,
-        "timestamp": "2025-01-16T04:20:20.236Z"
+        "boardid": 0
       },
       {
         "count": 3,
-        "boardid": 0,
-        "timestamp": "2025-01-16T04:27:08.133Z"
+        "boardid": 3
       }
     ],
     "themalcontrollers": [],
     "envcontrollers": [],
-    "timestamp": "2025-01-16T04:12:57.704Z"
+    "timestamp": "2025-01-20T12:23:14.229Z"
+  },
+  {
+    "postid": 2,
+    "netcontrollers": [],
+    "portcontrollers": [
+      {
+        "count": 1,
+        "boardid": 6
+      }
+    ],
+    "cabinetcontrollers": [
+      {
+        "count": 1,
+        "boardid": 3
+      }
+    ],
+    "themalcontrollers": [],
+    "envcontrollers": [],
+    "timestamp": "2025-01-20T12:23:14.276Z"
   },
   {
     "postid": 3,
@@ -31,33 +57,15 @@
     "cabinetcontrollers": [
       {
         "count": 1,
-        "boardid": 3,
-        "timestamp": "2025-01-16T06:51:30.265Z"
+        "boardid": 0
+      },
+      {
+        "count": 2,
+        "boardid": 3
       }
     ],
     "themalcontrollers": [],
-    "envcontrollers": [
-      {
-        "count": 1,
-        "boardid": 0,
-        "timestamp": "2025-01-16T04:15:16.205Z"
-      }
-    ],
-    "timestamp": "2025-01-16T04:15:16.205Z"
-  },
-  {
-    "postid": 1,
-    "netcontrollers": [],
-    "portcontrollers": [],
-    "cabinetcontrollers": [],
-    "themalcontrollers": [],
-    "envcontrollers": [
-      {
-        "count": 1,
-        "boardid": 0,
-        "timestamp": "2025-01-16T04:25:44.284Z"
-      }
-    ],
-    "timestamp": "2025-01-16T04:25:44.284Z"
+    "envcontrollers": [],
+    "timestamp": "2025-01-20T12:23:14.286Z"
   }
 ]
