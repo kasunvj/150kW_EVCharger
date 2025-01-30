@@ -1,0 +1,23 @@
+base.js : working code
+    +- lib/can-test.js : can library
+    +- nodecan.js : can structure implementation
+    o- canlist.json : generate as a output of calling of command 10, sync 
+
+    node base.js opmode loglevel
+        opmode :  2- CAN bus listen off mode
+                  other- normal working
+        loglevel: 0- No logs
+                  1- all logs colored
+                  other- all log
+
+emulator.js : generate can messages 
+    node emulator
+
+test_base.js : testing of can-test.lib
+    +- lib/can-test.js : can library
+    +- test_cases.json : contain test cases
+    +- nodecan.js : can structure implementation
+    o- canlist.json : generate as a output of calling of command 10, sync 
+
+readme
+    readme

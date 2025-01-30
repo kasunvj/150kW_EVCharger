@@ -15,6 +15,10 @@ var message = {
   };
 
 function getControlleName(board){
+    /**
+     * @param board : int 
+     * @returns string of names with colours
+    */
     switch(board){
         case 0: return `\x1b[92mPC \x1b[00m`;
         case 1: return `\x1b[92mCC \x1b[00m`;
@@ -25,6 +29,10 @@ function getControlleName(board){
     }
 }
 function getCmmandType(board){
+    /**
+     * @param board : string 
+     * @returns string of names with colours
+    */
     switch(board){
         case '00': return `\x1b[92mREQ \x1b[00m`;
         case '01': return `\x1b[92mRSP \x1b[00m`;
@@ -32,6 +40,10 @@ function getCmmandType(board){
 }
 
 function getErrType(board){
+    /**
+     * @param board : string 
+     * @returns string of names with colours
+    */
     switch(board){
         case '000': return `\x1b[92mNORMAL\x1b[00m`;
         case '001': return `\x1b[92mFAULT \x1b[00m`;
@@ -84,8 +96,8 @@ class CanModule{
     }
 
     start(){
-        /*
-        start the channel and start listening
+        /**
+         * Starting CAN listen
         */
         this.posts = [];
         channel.start();
@@ -117,7 +129,8 @@ class CanModule{
     encode(src,srcpid,srcbid,des,despid,desbid,cmdtype,canerr,cancmd){
         /**
          * @param src : source (string)
-         * @param srcpid : source post id (int)
+         * @param srcpid : source
+         *  post id (int)
          * @param srcbid : source board id (int)
          * @param des : destination (string)
          * @param despid : destination post id (int)
@@ -144,23 +157,42 @@ class CanModule{
         forthbyte = ((nodecan["destination"]["type"][des] << nodecan.destination.post.nbits | despid ) << nodecan.destination.board.nbits) | desbid;
         }
         const id = Buffer.from([firstbyte,secondbyte,thirdbyte,forthbyte]);
+
+        message.id =  id[3] + (id[2] << 8) + (id[1] << 16 ) + (id[0] << 24)
         return id;
     }
 
     send(src,srcpid,srcbid,des,despid,desbid,type,errorcode,command,candata){
         /**
-         * @param src : 
-        */
+         * @param src : source (string)
+         * @param srcpid : source post id (int)
+         * @param srcbid : source board id (int)
+         * @param des : destination (string)
+         * @param despid : destination post id (int)
+         * @param desbid : destination baord id (int)
+         * @param cmdtype : command type string 
+         * @param canerr :can error string
+         * @param cancmd : command string
+         * @returns None
+         */
         console.log(`${src.toString(2).padStart(nodecan.protocol.bits.src,"0")}`);
         console.log(`${des.toString(2).padStart(nodecan.protocol.bits.des,"0")}`);
         console.log(`${type.toString(2).padStart(nodecan.protocol.bits.type,"0")}`);
         console.log(`${errorcode.toString(2).padStart(nodecan.protocol.bits.errorcode,"0")}`);
         console.log(`${command.toString(2).padStart(nodecan.protocol.bits.command,"0")}`);
         
-        message.id = '0x'+ this.encode(src,srcpid,srcbid,des,despid,desbid,type,errorcode,command).toString('hex');
+        //message.id = '0x'+ this.encode(src,srcpid,srcbid,des,despid,desbid,type,errorcode,command).toString('hex');
+        message.id = this.encode(src,srcpid,srcbid,des,despid,desbid,type,errorcode,command);
         //message.data = this.assembleData(candata);
         
+        console.log("---- CANBUS -----");
+        console.log(message.id);
+        console.log(message.data);
+        console.log("---- CANBUS -----");
+        /*
+        logging(logginglevel,'y',"msg sending .. ")
         channel.send(message);
+        */
     }
     
 
@@ -226,7 +258,12 @@ class CanModule{
 
 
     updateCanDeviceTrable(source,sourcePostId,sourceBoardId){
-        //checking posts, add new one if not avilable
+        /**
+         * Updating devices in the CAN network 
+         * @param source : int , decoded source type 
+         * @param sourcePostId: int , decoded source post ID
+         * @param sourceBoardId: int , decoded source board ID
+        */
         const result_post = this.posts.find(item => item.postid === sourcePostId);
         if(result_post){
             logging(logginglevel,'r',"post exists");
@@ -342,6 +379,13 @@ class CanModule{
 
     isThisBoardAvilable(postindex,src,sourceBoardId){
 
+        /**
+         * @param postindex : int , post index
+         * @param src : int , source type number
+         * @param sourceBoardId : int , surce board number
+         * @returns
+         * 
+        */
         switch(src){
             case nodecan.source.type.pc:
                 return this.posts[postindex].portcontrollers.find(item => item.boardid === sourceBoardId);
