@@ -9,10 +9,10 @@
  *            1: colord logs
  */
 
-const { CanModule } = require('./lib/can-test.js');
+const { Comm } = require('./lib/can-test.js');
 const canbus = require('./nodecan.json');
 const { logger } = require('./lib/log.js');
-const can = new CanModule();
+const can = new Comm();
 const opmode = parseInt(process.argv[2]);
 
 const readline = require('readline');

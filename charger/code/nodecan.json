@@ -61,64 +61,76 @@
                 "action":{
                     "dtype":"string",
                     "startbyte":0,
-                    "endbyte":1
+                    "endbyte":1,
+                    "value":0
                 },
                 "contactor":{
                     "dtype":"string",
                     "startbyte":0,
-                    "endbyte":1
+                    "endbyte":1,
+                    "value":0
                 },
                 "state":{
                     "dtype":"string",
                     "startbyte":1,
-                    "endbyte":2
+                    "endbyte":2,
+                    "value":0
                 },
                 "cabletemp":{
                     "dtype":"string",
                     "startbyte":3,
-                    "endbyte":4
+                    "endbyte":4,
+                    "value":0
                 },
                 "requestVoltage":{
                     "dtype":"string",
                     "startbyte":4,
-                    "endbyte":6
+                    "endbyte":6,
+                    "value":0
                 },
                 "requestCurrent":{
                     "dtype":"string",
                     "startbyte":6,
-                    "endbyte":8
+                    "endbyte":8,
+                    "value":0
                 }
             },
             "responce":{
-                "FBaction":{
+                "fbaction":{
                     "dtype":"string",
                     "startbyte":0,
-                    "endbyte":1
+                    "endbyte":1,
+                    "value":0
                 },
-                "FBcontactor":{
+                "fbcontactor":{
                     "dtype":"string",
                     "startbyte":0,
-                    "endbyte":1
+                    "endbyte":1,
+                    "value":0
                 },
                 "state":{
                     "dtype":"string",
                     "startbyte":1,
-                    "endbyte":2
+                    "endbyte":2,
+                    "value":0
                 },
                 "none":{
                     "dtype":"string",
                     "startbyte":3,
-                    "endbyte":4
+                    "endbyte":4,
+                    "value":0
                 },
                 "busVoltage":{
                     "dtype":"string",
                     "startbyte":4,
-                    "endbyte":6
+                    "endbyte":6,
+                    "value":0
                 },
                 "busCurrent":{
                     "dtype":"string",
                     "startbyte":6,
-                    "endbyte":8
+                    "endbyte":8,
+                    "value":0
                 }
             }
         },
@@ -129,17 +141,21 @@
                 "maxPower":{
                     "dtype":"string",
                     "startbyte":0,
-                    "endbyte":4
+                    "endbyte":4,
+                    "value":0
+                    
                 },
                 "maxVolatge":{
                     "dtype":"string",
                     "startbyte":4,
-                    "endbyte":6
+                    "endbyte":6,
+                    "value":0
                 },
                 "maxCurrent":{
                     "dtype":"string",
                     "startbyte":6,
-                    "endbyte":8
+                    "endbyte":8,
+                    "value":0
                 }
                 }
         },
@@ -149,44 +165,58 @@
                 "chargingState":{
                     "dtype":"string",
                     "startbyte":0,
-                    "endbyte":1
+                    "endbyte":1,
+                    "value":0
                 },
-                "NCState":{
+                "ncstate":{
                     "dtype":"string",
                     "startbyte":1,
-                    "endbyte":2
+                    "endbyte":2,
+                    "value":0
+                },
+                "protocol":{
+                    "dtype":"string",
+                    "startbyte":2,
+                    "endbyte":3,
+                    "value":0
                 }
             },
             "responce":{
                 "chargingState":{
                     "dtype":"string",
                     "startbyte":0,
-                    "endbyte":1
+                    "endbyte":1,
+                    "value":0
                 },
                 "ecode":{
                     "dtype":"string",
                     "startbyte":1,
-                    "endbyte":2
+                    "endbyte":2,
+                    "value":0
                 },
-                "flags":{
+                "protocol":{
                     "dtype":"string",
                     "startbyte":2,
-                    "endbyte":3
+                    "endbyte":2,
+                    "value":3
                 },
                 "soc":{
                     "dtype":"string",
                     "startbyte":3,
-                    "endbyte":4
+                    "endbyte":4,
+                    "value":0
                 },
                 "instVoltage":{
                     "dtype":"string",
                     "startbyte":4,
-                    "endbyte":6
+                    "endbyte":6,
+                    "value":0
                 },
                 "instCurrent":{
                     "dtype":"string",
                     "startbyte":6,
-                    "endbyte":8
+                    "endbyte":8,
+                    "value":0
                 }
             }
         },
@@ -197,54 +227,63 @@
                "accEnergy":{
                     "dtype":"string",
                     "startbyte":0,
-                    "endbyte":4
+                    "endbyte":4,
+                    "value":0
                 }, 
                 "instPower":{
                     "dtype":"string",
                     "startbyte":4,
-                    "endbyte":8
+                    "endbyte":8,
+                    "value":0
                 }
             }
         },
-        "get_tmctemp": {
+        "set_tmctemp": {
             "number":6,
             "request":{
                 "CCState":{
                     "dtype":"string",
                     "startbyte":0,
-                    "endbyte":1
+                    "endbyte":1,
+                    "value":0
                 }, 
                 "cabinetPowerOut":{
                     "dtype":"string",
                     "startbyte":1,
-                    "endbyte":3
+                    "endbyte":3,
+                    "value":0
                 }, 
                 "maxTemp":{
                     "dtype":"string",
                     "startbyte":5,
-                    "endbyte":6
+                    "endbyte":6,
+                    "value":0
                 },
                 "minTemp":{
                     "dtype":"string",
                     "startbyte":6,
-                    "endbyte":7
+                    "endbyte":7,
+                    "value":0
                 }, 
                 "avgTemp":{
                     "dtype":"string",
                     "startbyte":7,
-                    "endbyte":8
+                    "endbyte":8,
+                    "value":0
                 }
             },
             "responce":{
                 "coolentTemp":{
                     "dtype":"string",
                     "startbyte":6,
-                    "endbyte":7
+                    "endbyte":7,
+                    "value":0
                 }, 
                 "TMCState":{
                     "dtype":"string",
                     "startbyte":7,
-                    "endbyte":8
+                    "endbyte":8,
+                    "value":0
                 }
             }
         },
@@ -254,22 +293,26 @@
                 "errorCode1":{
                     "dtype":"string",
                     "startbyte":0,
-                    "endbyte":1
+                    "endbyte":1,
+                    "value":0
                 }, 
                 "errorCode2":{
                     "dtype":"string",
                     "startbyte":1,
-                    "endbyte":2
+                    "endbyte":2,
+                    "value":0
                 }, 
                 "errorCode3":{
                     "dtype":"string",
                     "startbyte":2,
-                    "endbyte":3
+                    "endbyte":3,
+                    "value":0
                 }, 
                 "errorCode4":{
                     "dtype":"string",
                     "startbyte":3,
-                    "endbyte":4
+                    "endbyte":4,
+                    "value":0
                 } 
             },
             "responce":{}
@@ -280,29 +323,34 @@
                 "maxPowerLimit":{
                     "dtype":"string",
                     "startbyte":4,
-                    "endbyte":8
+                    "endbyte":8,
+                    "value":0
                 }
             },
             "responce":{
-                "defaultPower":{
+                "defPower":{
                     "dtype":"string",
                     "startbyte":0,
-                    "endbyte":2
+                    "endbyte":2,
+                    "value":0
                 }, 
                 "phaseABVoltage":{
                     "dtype":"string",
                     "startbyte":2,
-                    "endbyte":4
+                    "endbyte":4,
+                    "value":0
                 },
                 "phaseBCVoltage":{
                     "dtype":"string",
                     "startbyte":4,
-                    "endbyte":6
+                    "endbyte":6,
+                    "value":0
                 },
                 "phaseCAVoltage":{
                     "dtype":"string",
                     "startbyte":6,
-                    "endbyte":8
+                    "endbyte":8,
+                    "value":0
                 }
             }
         },
@@ -312,12 +360,14 @@
                 "multiplexor":{
                     "dtype":"string",
                     "startbyte":0,
-                    "endbyte":1
+                    "endbyte":1,
+                    "value":0
                 },
                 "logData":{
                     "dtype":"string",
                     "startbyte":1,
-                    "endbyte":8
+                    "endbyte":8,
+                    "value":0
                 }
             },
             "responce":{}
@@ -328,12 +378,14 @@
                 "multiplexor":{
                     "dtype":"string",
                     "startbyte":0,
-                    "endbyte":1
+                    "endbyte":1,
+                    "value":0
                 },
                 "logData":{
                     "dtype":"string",
                     "startbyte":1,
-                    "endbyte":8
+                    "endbyte":8,
+                    "value":0
                 }
             },
             "responce":{}

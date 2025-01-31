@@ -1,4 +1,5 @@
 const nodecan = require('../nodecan.json');
+const EventEmitter = require('events');
 const can = require('socketcan');
 const channel = can.createRawChannel('can0', true);
 const fs = require('fs');
@@ -110,7 +111,7 @@ class Comm{
                 logging(logginglevel,'r',"CAN channel started and listening.");
                 channel.addListener('onMessage', (msg) => {
                     count++;
-                    this.decode(msg);
+                    this.emit('messageReceived',)
                   });
                 break;
         }
@@ -471,5 +472,15 @@ class Comm{
 
 
   }
+
+
+class Decode{
+    constructor(comm){
+        this.comm = comm;
+    }
+    
+    
+
+}
 
 module.exports = { Comm };

@@ -8,7 +8,7 @@ const can = new CanModule();
 
 function test_message_encode_and_decode(){
     /**
-     * Testing packet enncoding and decoding 
+     * Testing packet enncoding and decoding in walkin 
     */
     const cases = testCases.messages;
 
