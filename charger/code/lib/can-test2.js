@@ -29,6 +29,7 @@ function getControlleName(board){
         case 7: return `\x1b[92mBRD\x1b[00m`;
     }
 }
+
 function getCmmandType(board){
     /**
      * @param board : string 
@@ -104,16 +105,20 @@ class Comm{
         channel.start();
         
         switch(opmode){
-            case 2:
-                logging(logginglevel,'r',`CAN channel started in test mode.\n   In this mode, can will not listen in to actual can bus.\n   Test messges directly redirect to decode `);
-                break;
-            default:
+            case 0:
                 logging(logginglevel,'r',"CAN channel started and listening.");
                 channel.addListener('onMessage', (msg) => {
                     count++;
-                    this.emit('messageReceived',)
+                    this.emit('messageReceived',msg)
                   });
                 break;
+            case 1:
+                logging(logginglevel,'r',`CAN channel started in test mode.\n   In this mode, can will not listen in to actual can bus.\n   Test messges directly redirect to decode `);
+                break;
+            default:
+                logging(logginglevel,'r',`Mode is not defined`);
+                break;
+                
         }
         
         
@@ -127,41 +132,7 @@ class Comm{
         logging(logginglevel,'r',"CAN channel stopped.");
         } 
 
-    encode(src,srcpid,srcbid,des,despid,desbid,cmdtype,canerr,cancmd){
-        /**
-         * @param src : source (string)
-         * @param srcpid : source
-         *  post id (int)
-         * @param srcbid : source board id (int)
-         * @param des : destination (string)
-         * @param despid : destination post id (int)
-         * @param desbid : destination baord id (int)
-         * @param cmdtype : command type string 
-         * @param canerr :can error string
-         * @param cancmd : command string
-         * @returns CAN ID buffer
-         */
-
-        let firstbyte = 0;
-        let secondbyte = 0;
-        let thirdbyte = 0;
-        let forthbyte = 0;
-
-        if ((srcpid < 0)||(srcpid > 3)) logging(logginglevel,'r',"Source post id out of range");
-        else if ((srcbid < 0)||(srcbid > 7)) logging(logginglevel,'r',"Source board id out of range"); 
-        else if ((despid < 0)||(despid > 3)) logging(logginglevel,'r',"Destination post id out of range");
-        else if ((desbid < 0)||(desbid > 7)) logging(logginglevel,'r',"Destination board id out of range");
-        else{
-        firstbyte = nodecan["type"][cmdtype] << nodecan.error.nbits | nodecan["error"][canerr];
-        secondbyte = nodecan["command"][cancmd]["number"];
-        thirdbyte = ((nodecan["source"]["type"][src] << nodecan.source.post.nbits | srcpid ) << nodecan.source.board.nbits ) | srcbid;
-        forthbyte = ((nodecan["destination"]["type"][des] << nodecan.destination.post.nbits | despid ) << nodecan.destination.board.nbits) | desbid;
-        }
-        const id = Buffer.from([firstbyte,secondbyte,thirdbyte,forthbyte]);
-
-        message.id =  id[3] + (id[2] << 8) + (id[1] << 16 ) + (id[0] << 24)
-        return id;
-    }
+    
 
     send(src,srcpid,srcbid,des,despid,desbid,type,errorcode,command,candata){
         /**
@@ -195,7 +166,232 @@ class Comm{
         channel.send(message);
         */
     }
+}
     
+class UpdateNetwork{
+    constructor(comm){
+        this.comm = comm;
+    }
+
+    update(source,sourcePostId,sourceBoardId){
+        /**
+         * Updating devices in the CAN network 
+         * @param source : int , decoded source type 
+         * @param sourcePostId: int , decoded source post ID
+         * @param sourceBoardId: int , decoded source board ID
+        */
+        const result_post = this.comm.posts.find(item => item.postid === sourcePostId);
+        if(result_post){
+            logging(logginglevel,'r',"post exists");
+        }else{
+            logging(logginglevel,'g',"post creating");
+            let obj = {
+                postid : sourcePostId,
+                netcontrollers :[],
+                portcontrollers :[],
+                cabinetcontrollers :[],
+                themalcontrollers :[],
+                envcontrollers :[],
+                timestamp: new Date().toISOString()
+            };
+            this.comm.posts.push(obj);
+        }
+
+        const postindex = this.comm.posts.findIndex(item => item.postid === sourcePostId);
+        this.isThisBoardAvilable(postindex,source,sourceBoardId)
+        
+        //adding devices in the post 
+        switch(source){
+            case nodecan.source.type.pc:
+                //port controller
+                if(!this.isThisBoardAvilable(postindex,nodecan.source.type.pc,sourceBoardId)){
+                    let obj = {
+                        count: this.comm.posts[postindex].portcontrollers.length + 1,
+                        boardid: sourceBoardId,
+                        //fill from command 0x02
+                        action: nodecan.command.set_voltagecurent.request.action.value,
+                        contactor: nodecan.command.set_voltagecurent.request.contactor.value,
+                        pcstate : nodecan.command.set_voltagecurent.request.state.value,
+                        cabletemp: nodecan.command.set_voltagecurent.request.cabletemp.value,
+                        reqvoltage: nodecan.command.set_voltagecurent.request.requestVoltage.value,
+                        reqcurrent: nodecan.command.set_voltagecurent.request.requestCurrent.value,
+                        //fill from command 0x04
+                        cstate: nodecan.command.set_portauth.responce.chargingState.value,
+                        ecode: nodecan.command.set_portauth.responce.ecode.value,
+                        protocol: nodecan.command.set_portauth.responce.protocol.value,
+                        soc: nodecan.command.set_portauth.responce.soc.value,
+                        instvoltage: nodecan.command.set_portauth.responce.instVoltage.value,
+                        instcurrent: nodecan.command.set_portauth.responce.instCurrent.value,
+                        //fill from command 0x05
+                        accenergy: nodecan.command.get_portmesurement.responce.accEnergy.value,
+                        instpower: nodecan.command.get_portmesurement.responce.instPower.value,
+                        //fill from command 0x09
+                        multiplexor: nodecan.command.set_logdata.request.multiplexor.value,
+                        logData : nodecan.command.set_logdata.request.logData.value
+
+                        
+                    };
+                    this.comm.posts[postindex].portcontrollers.push(obj);
+                    logging(logginglevel,'g',`+ new ${getControlleName(source)} added`);
+                }
+                else{
+                    logging(logginglevel,'r',`${getControlleName(source)} at post ${sourcePostId} board ${sourceBoardId} exists`);
+                }
+                break;
+
+            case nodecan.source.type.cc:
+                //cabinet controller
+                if(!this.isThisBoardAvilable(postindex,nodecan.source.type.cc,sourceBoardId)){
+                    let obj = {
+                        count: this.comm.posts[postindex].cabinetcontrollers.length + 1,
+                        boardid: sourceBoardId,
+                        //fill from command 0x02
+                        fbaction: nodecan.command.set_voltagecurent.responce.fbaction.value,
+                        fbcontactor: nodecan.command.set_voltagecurent.responce.fbcontactor.value,
+                        ccstate_to_pc : nodecan.command.set_voltagecurent.responce.state.value,
+                        busvoltage: nodecan.command.set_voltagecurent.responce.busVoltage.value,
+                        buscurrent: nodecan.command.set_voltagecurent.responce.busCurrent.value,
+                        //fill from command 0x03
+                        maxpower: nodecan.command.get_maxvoltage.responce.maxPower.value,
+                        maxvoltage : nodecan.command.get_maxvoltage.responce.maxVolatge.value,
+                        maxcurrent : nodecan.command.get_maxvoltage.responce.maxCurrent.value,
+                        //fill from command 0x06
+                        ccstate_to_tmc: nodecan.command.set_tmctemp.request.CCState.value,
+                        cpowerout: nodecan.command.set_tmctemp.request.cabinetPowerOut.value,
+                        maxtemp: nodecan.command.set_tmctemp.request.maxTemp.value,
+                        mintemp: nodecan.command.set_tmctemp.request.minTemp.value,
+                        avgtemp: nodecan.command.set_tmctemp.request.avgTemp.value,
+                        //fill from command 0x08
+                        defPower: nodecan.command.set_maxpower.responce.defPower.value,
+                        voltageAB: nodecan.command.set_maxpower.responce.phaseABVoltage.value,
+                        voltageBC: nodecan.command.set_maxpower.responce.phaseBCVoltage.value,
+                        voltageCA: nodecan.command.set_maxpower.responce.phaseCAVoltage.value,
+                        //fill from command 0x09
+                        multiplexor: nodecan.command.set_logdata.request.multiplexor.value,
+                        logData : nodecan.command.set_logdata.request.logData.value
+
+
+                    };
+                    this.comm.posts[postindex].cabinetcontrollers.push(obj);
+                    logging(logginglevel,'g',`+ new ${getControlleName(source)} added`);
+                }
+                else{
+                    logging(logginglevel,'r',`${getControlleName(source)} at post ${sourcePostId} board ${sourceBoardId} exists`);
+                }
+                break;
+
+            case nodecan.source.type.nc:
+                //network controller
+                if(!this.isThisBoardAvilable(postindex,nodecan.source.type.nc,sourceBoardId)){
+                    let obj = {
+                        count: this.comm.posts[postindex].netcontrollers.length + 1,
+                        boardid: sourceBoardId,
+                        //fill from command 0x04
+                        chargingState: nodecan.command.set_portauth.request.chargingState.value,
+                        ncstate: nodecan.command.set_portauth.request.ncstate.value,
+                        protocol: nodecan.command.set_portauth.request.protocol.value,
+                        //fill from command 0x08
+                        maxPowerLim: nodecan.command.set_maxpower.request.maxPowerLimit.value
+                    };
+                    this.comm.posts[postindex].netcontrollers.push(obj);
+                    logging(logginglevel,'g',`+ new ${getControlleName(source)} added`);
+                }
+                else{
+                    logging(logginglevel,'r',`${getControlleName(source)} at post ${sourcePostId} board ${sourceBoardId} exists`);
+                }
+                break;
+
+            case nodecan.source.type.tmc:
+                //themal controller
+                if(!this.isThisBoardAvilable(postindex,nodecan.source.type.tmc,sourceBoardId)){
+                    let obj = {
+                        count: this.comm.posts[postindex].themalcontrollers.length + 1,
+                        boardid: sourceBoardId,
+                        coolanttemp: nodecan.command.set_tmctemp.responce.coolentTemp.value,
+                        tmcstate: nodecan.command.set_tmctemp.responce.TMCState.value
+                        
+                    };
+                    this.comm.posts[postindex].themalcontrollers.push(obj);
+                    logging(logginglevel,'g',`+ new ${getControlleName(source)} added`);
+                }
+                else{
+                    logging(logginglevel,'r',`${getControlleName(source)} at post ${sourcePostId} board ${sourceBoardId} exists`);
+                }
+                break;
+
+            case nodecan.source.type.esc:
+                //envioment controller
+                if(!this.isThisBoardAvilable(postindex,nodecan.source.type.esc,sourceBoardId)){
+                    let obj = {
+                        count: this.comm.posts[postindex].envcontrollers.length + 1,
+                        boardid: sourceBoardId,
+                        //fill from command 0x07
+                        errorCode1: nodecan.command.set_escstate.request.errorCode1.value,
+                        errorCode2: nodecan.command.set_escstate.request.errorCode2.value,
+                        errorCode3: nodecan.command.set_escstate.request.errorCode3.value,
+                        errorCode4: nodecan.command.set_escstate.request.errorCode4.value,
+                    };
+                    this.comm.posts[postindex].envcontrollers.push(obj);
+                    logging(logginglevel,'g',`+ new ${getControlleName(source)} added`);
+                }
+                else{
+                    logging(logginglevel,'r',`${getControlleName(source)} at post ${sourcePostId} board ${sourceBoardId} exists`);
+                }
+                break;
+            default :
+                logging(logginglevel,'r',`node post to add or sync ${source}`)
+
+        }
+        //console.log(this.posts);
+        
+        const jsonData = JSON.stringify(this.comm.posts, null, 2);
+
+        fs.writeFile('canlist.json', jsonData, (err) => {
+            if (err) {
+              console.error('Error writing JSON file:', err);
+            } 
+          });
+
+        
+    }
+
+    isThisBoardAvilable(postindex,src,sourceBoardId){
+
+        /**
+         * @param postindex : int , post index
+         * @param src : int , source type number
+         * @param sourceBoardId : int , surce board number
+         * @returns
+         * 
+        */
+       console.log("+++++++++++++++++++++");
+       console.log(postindex);
+       console.log(src);
+       console.log(sourceBoardId);
+       console.log(this.comm)
+       console.log("+++++++++++++++++++++");
+        switch(src){
+            case nodecan.source.type.pc:
+                return this.comm.posts[postindex].portcontrollers.find(item => item.boardid === sourceBoardId);
+            case nodecan.source.type.nc:
+                return this.comm.posts[postindex].netcontrollers.find(item => item.boardid === sourceBoardId); 
+            case nodecan.source.type.cc:
+                return this.comm.posts[postindex].cabinetcontrollers.find(item => item.boardid === sourceBoardId); 
+            case nodecan.source.type.esc:
+                return this.comm.posts[postindex].envcontrollers.find(item => item.boardid === sourceBoardId);
+            case nodecan.source.type.tmc:
+                return this.comm.posts[postindex].themalcontrollers.find(item => item.boardid === sourceBoardId);
+            default:
+                return false;
+        }
+    }
+
+}
+
+class Decoder{
+    constructor(comm){
+        this.comm = comm;
+    }
 
     decode(msg){
         /**
@@ -236,11 +432,21 @@ class Comm{
                             slice(nodecan.destination.board.bitlocation.start,nodecan.destination.board.bitlocation.end),2);
         
         
-
+        const updatetable = new UpdateNetwork(this.comm);
 
         switch(command){
+            case 2:
+                if(updatetable.isThisBoardAvilable(sourcePostId,source,sourceBoardId)){
+                    console.log("avilable *************");
+                }
+                else{
+                    console.log("not avilable *************");
+                }
+                
             case 10:
-                this.updateCanDeviceTrable(source,sourcePostId,sourceBoardId);
+                
+                updatetable.update(source,sourcePostId,sourceBoardId);
+                break;
         }
 
         console.log(`\x1b[92m - - - + ${count} -\x1b[00m`)
@@ -262,225 +468,47 @@ class Comm{
     }
 
 
-    updateCanDeviceTrable(source,sourcePostId,sourceBoardId){
-        /**
-         * Updating devices in the CAN network 
-         * @param source : int , decoded source type 
-         * @param sourcePostId: int , decoded source post ID
-         * @param sourceBoardId: int , decoded source board ID
-        */
-        const result_post = this.posts.find(item => item.postid === sourcePostId);
-        if(result_post){
-            logging(logginglevel,'r',"post exists");
-        }else{
-            logging(logginglevel,'g',"post creating");
-            let obj = {
-                postid : sourcePostId,
-                netcontrollers :[],
-                portcontrollers :[],
-                cabinetcontrollers :[],
-                themalcontrollers :[],
-                envcontrollers :[],
-                timestamp: new Date().toISOString()
-            };
-            this.posts.push(obj);
-        }
+}
 
-        const postindex = this.posts.findIndex(item => item.postid === sourcePostId);
-        this.isThisBoardAvilable(postindex,source,sourceBoardId)
-        
-        //adding devices in the post 
-        switch(source){
-            case nodecan.source.type.pc:
-                //port controller
-                if(!this.isThisBoardAvilable(postindex,nodecan.source.type.pc,sourceBoardId)){
-                    let obj = {
-                        count: this.posts[postindex].portcontrollers.length + 1,
-                        boardid: sourceBoardId,
-                        //fill from command 0x02
-                        action: nodecan.command.set_voltagecurent.request.action.value,
-                        contactor: nodecan.command.set_voltagecurent.request.contactor.value,
-                        pcstate : nodecan.command.set_voltagecurent.request.state.value,
-                        cabletemp: nodecan.command.set_voltagecurent.request.cabletemp.value,
-                        reqvoltage: nodecan.command.set_voltagecurent.request.requestVoltage.value,
-                        reqcurrent: nodecan.command.set_voltagecurent.request.requestCurrent.value,
-                        //fill from command 0x04
-                        cstate: nodecan.command.set_portauth.responce.chargingState.value,
-                        ecode: nodecan.command.set_portauth.responce.ecode.value,
-                        protocol: nodecan.command.set_portauth.responce.protocol.value,
-                        soc: nodecan.command.set_portauth.responce.soc.value,
-                        instvoltage: nodecan.command.set_portauth.responce.instVoltage.value,
-                        instcurrent: nodecan.command.set_portauth.responce.instCurrent.value,
-                        //fill from command 0x05
-                        accenergy: nodecan.command.get_portmesurement.responce.accEnergy.value,
-                        instpower: nodecan.command.get_portmesurement.responce.instPower.value,
-                        //fill from command 0x09
-                        multiplexor: nodecan.command.set_logdata.request.multiplexor.value,
-                        logData : nodecan.command.set_logdata.request.logData.value
-
-                        
-                    };
-                    this.posts[postindex].portcontrollers.push(obj);
-                    logging(logginglevel,'g',`+ new ${getControlleName(source)} added`);
-                }
-                else{
-                    logging(logginglevel,'r',`${getControlleName(source)} at post ${sourcePostId} board ${sourceBoardId} exists`);
-                }
-                break;
-
-            case nodecan.source.type.cc:
-                //cabinet controller
-                if(!this.isThisBoardAvilable(postindex,nodecan.source.type.cc,sourceBoardId)){
-                    let obj = {
-                        count: this.posts[postindex].cabinetcontrollers.length + 1,
-                        boardid: sourceBoardId,
-                        //fill from command 0x02
-                        fbaction: nodecan.command.set_voltagecurent.responce.fbaction.value,
-                        fbcontactor: nodecan.command.set_voltagecurent.responce.fbcontactor.value,
-                        ccstate_to_pc : nodecan.command.set_voltagecurent.responce.state.value,
-                        busvoltage: nodecan.command.set_voltagecurent.responce.busVoltage.value,
-                        buscurrent: nodecan.command.set_voltagecurent.responce.busCurrent.value,
-                        //fill from command 0x03
-                        maxpower: nodecan.command.get_maxvoltage.responce.maxPower.value,
-                        maxvoltage : nodecan.command.get_maxvoltage.responce.maxVolatge.value,
-                        maxcurrent : nodecan.command.get_maxvoltage.responce.maxCurrent.value,
-                        //fill from command 0x06
-                        ccstate_to_tmc: nodecan.command.set_tmctemp.request.CCState.value,
-                        cpowerout: nodecan.command.set_tmctemp.request.cabinetPowerOut.value,
-                        maxtemp: nodecan.command.set_tmctemp.request.maxTemp.value,
-                        mintemp: nodecan.command.set_tmctemp.request.minTemp.value,
-                        avgtemp: nodecan.command.set_tmctemp.request.avgTemp.value,
-                        //fill from command 0x08
-                        defPower: nodecan.command.set_maxpower.responce.defPower.value,
-                        voltageAB: nodecan.command.set_maxpower.responce.phaseABVoltage.value,
-                        voltageBC: nodecan.command.set_maxpower.responce.phaseBCVoltage.value,
-                        voltageCA: nodecan.command.set_maxpower.responce.phaseCAVoltage.value,
-                        //fill from command 0x09
-                        multiplexor: nodecan.command.set_logdata.request.multiplexor.value,
-                        logData : nodecan.command.set_logdata.request.logData.value
-
-
-                    };
-                    this.posts[postindex].cabinetcontrollers.push(obj);
-                    logging(logginglevel,'g',`+ new ${getControlleName(source)} added`);
-                }
-                else{
-                    logging(logginglevel,'r',`${getControlleName(source)} at post ${sourcePostId} board ${sourceBoardId} exists`);
-                }
-                break;
-
-            case nodecan.source.type.nc:
-                //network controller
-                if(!this.isThisBoardAvilable(postindex,nodecan.source.type.nc,sourceBoardId)){
-                    let obj = {
-                        count: this.posts[postindex].netcontrollers.length + 1,
-                        boardid: sourceBoardId,
-                        //fill from command 0x04
-                        chargingState: nodecan.command.set_portauth.request.chargingState.value,
-                        ncstate: nodecan.command.set_portauth.request.ncstate.value,
-                        protocol: nodecan.command.set_portauth.request.protocol.value,
-                        //fill from command 0x08
-                        maxPowerLim: nodecan.command.set_maxpower.request.maxPowerLimit.value
-                    };
-                    this.posts[postindex].netcontrollers.push(obj);
-                    logging(logginglevel,'g',`+ new ${getControlleName(source)} added`);
-                }
-                else{
-                    logging(logginglevel,'r',`${getControlleName(source)} at post ${sourcePostId} board ${sourceBoardId} exists`);
-                }
-                break;
-
-            case nodecan.source.type.tmc:
-                //themal controller
-                if(!this.isThisBoardAvilable(postindex,nodecan.source.type.tmc,sourceBoardId)){
-                    let obj = {
-                        count: this.posts[postindex].themalcontrollers.length + 1,
-                        boardid: sourceBoardId,
-                        coolanttemp: nodecan.command.set_tmctemp.responce.coolentTemp.value,
-                        tmcstate: nodecan.command.set_tmctemp.responce.TMCState.value
-                        
-                    };
-                    this.posts[postindex].themalcontrollers.push(obj);
-                    logging(logginglevel,'g',`+ new ${getControlleName(source)} added`);
-                }
-                else{
-                    logging(logginglevel,'r',`${getControlleName(source)} at post ${sourcePostId} board ${sourceBoardId} exists`);
-                }
-                break;
-
-            case nodecan.source.type.esc:
-                //envioment controller
-                if(!this.isThisBoardAvilable(postindex,nodecan.source.type.esc,sourceBoardId)){
-                    let obj = {
-                        count: this.posts[postindex].envcontrollers.length + 1,
-                        boardid: sourceBoardId,
-                        //fill from command 0x07
-                        errorCode1: nodecan.command.set_escstate.request.errorCode1.value,
-                        errorCode2: nodecan.command.set_escstate.request.errorCode2.value,
-                        errorCode3: nodecan.command.set_escstate.request.errorCode3.value,
-                        errorCode4: nodecan.command.set_escstate.request.errorCode4.value,
-                    };
-                    this.posts[postindex].envcontrollers.push(obj);
-                    logging(logginglevel,'g',`+ new ${getControlleName(source)} added`);
-                }
-                else{
-                    logging(logginglevel,'r',`${getControlleName(source)} at post ${sourcePostId} board ${sourceBoardId} exists`);
-                }
-                break;
-            default :
-                logging(logginglevel,'r',`node post to add or sync ${source}`)
-
-        }
-        //console.log(this.posts);
-        
-        const jsonData = JSON.stringify(this.posts, null, 2);
-
-        fs.writeFile('canlist.json', jsonData, (err) => {
-            if (err) {
-              console.error('Error writing JSON file:', err);
-            } 
-          });
-
-        
-    }
-
-    isThisBoardAvilable(postindex,src,sourceBoardId){
-
-        /**
-         * @param postindex : int , post index
-         * @param src : int , source type number
-         * @param sourceBoardId : int , surce board number
-         * @returns
-         * 
-        */
-        switch(src){
-            case nodecan.source.type.pc:
-                return this.posts[postindex].portcontrollers.find(item => item.boardid === sourceBoardId);
-            case nodecan.source.type.nc:
-                return this.posts[postindex].netcontrollers.find(item => item.boardid === sourceBoardId); 
-            case nodecan.source.type.cc:
-                return this.posts[postindex].cabinetcontrollers.find(item => item.boardid === sourceBoardId); 
-            case nodecan.source.type.esc:
-                return this.posts[postindex].envcontrollers.find(item => item.boardid === sourceBoardId);
-            case nodecan.source.type.tmc:
-                return this.posts[postindex].themalcontrollers.find(item => item.boardid === sourceBoardId);
-            default:
-                return false;
-        }
-    }
-
-
-
-  }
-
-
-class Decode{
+class Encoder{
     constructor(comm){
         this.comm = comm;
     }
-    
-    
 
+    encode(src,srcpid,srcbid,des,despid,desbid,cmdtype,canerr,cancmd){
+        /**
+         * @param src : source (string)
+         * @param srcpid : source
+         *  post id (int)
+         * @param srcbid : source board id (int)
+         * @param des : destination (string)
+         * @param despid : destination post id (int)
+         * @param desbid : destination baord id (int)
+         * @param cmdtype : command type string 
+         * @param canerr :can error string
+         * @param cancmd : command string
+         * @returns CAN ID buffer
+         */
+
+        let firstbyte = 0;
+        let secondbyte = 0;
+        let thirdbyte = 0;
+        let forthbyte = 0;
+
+        if ((srcpid < 0)||(srcpid > 3)) logging(logginglevel,'r',"Source post id out of range");
+        else if ((srcbid < 0)||(srcbid > 7)) logging(logginglevel,'r',"Source board id out of range"); 
+        else if ((despid < 0)||(despid > 3)) logging(logginglevel,'r',"Destination post id out of range");
+        else if ((desbid < 0)||(desbid > 7)) logging(logginglevel,'r',"Destination board id out of range");
+        else{
+        firstbyte = nodecan["type"][cmdtype] << nodecan.error.nbits | nodecan["error"][canerr];
+        secondbyte = nodecan["command"][cancmd]["number"];
+        thirdbyte = ((nodecan["source"]["type"][src] << nodecan.source.post.nbits | srcpid ) << nodecan.source.board.nbits ) | srcbid;
+        forthbyte = ((nodecan["destination"]["type"][des] << nodecan.destination.post.nbits | despid ) << nodecan.destination.board.nbits) | desbid;
+        }
+        const id = Buffer.from([firstbyte,secondbyte,thirdbyte,forthbyte]);
+
+        return id[3] + (id[2] << 8) + (id[1] << 16 ) + (id[0] << 24);
+    }
 }
 
-module.exports = { Comm };
+module.exports = { Comm, Decoder, Encoder };

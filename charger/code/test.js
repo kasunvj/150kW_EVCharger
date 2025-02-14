@@ -33,7 +33,9 @@ function dothis(){
   console.log( buf[3] + (buf[2] << 8) + (buf[1] << 16 ) + (buf[0] << 24) );
 
   var num = 10;
-  console.log(10 << 8 | 10);
+  var a =1000000;
+  var b =123456545342;
+  var c = 342531;
 
 
 }

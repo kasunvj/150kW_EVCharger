@@ -103,15 +103,27 @@ class Comm{
         channel.start();
         
         switch(opmode){
-            case 2:
-                logging(logginglevel,'r',`CAN channel started in test mode.\n   In this mode, can will not listen in to actual can bus.\n   Test messges directly redirect to decode `);
-                break;
-            default:
+            case 0:
                 logging(logginglevel,'r',"CAN channel started and listening.");
                 channel.addListener('onMessage', (msg) => {
                     count++;
                     this.decode(msg);
                   });
+                break;
+
+            case 1:
+                logging(logginglevel,'r',`CAN channel started in test mode.\n   In this mode, can will not listen in to actual can bus.\n   Test messges directly redirect to decode `);
+                break;
+
+            case 2:
+                
+                logging(logginglevel,'r',"CAN channel started and listening.");
+                channel.addListener('onMessage', (msg) => {
+                    count++;
+                    this.decode(msg);
+                    });
+                break;
+            default:
                 break;
         }
         
@@ -158,8 +170,7 @@ class Comm{
         }
         const id = Buffer.from([firstbyte,secondbyte,thirdbyte,forthbyte]);
 
-        message.id =  id[3] + (id[2] << 8) + (id[1] << 16 ) + (id[0] << 24)
-        return id;
+        return id[3] + (id[2] << 8) + (id[1] << 16 ) + (id[0] << 24);
     }
 
     send(src,srcpid,srcbid,des,despid,desbid,type,errorcode,command,candata){
@@ -185,14 +196,19 @@ class Comm{
         message.id = this.encode(src,srcpid,srcbid,des,despid,desbid,type,errorcode,command);
         //message.data = this.assembleData(candata);
         
+        //message.id = 
+
+        console.log("****************************************");
         console.log("---- CANBUS -----");
         console.log(message.id);
         console.log(message.data);
+        console.log(message);
         console.log("---- CANBUS -----");
-        /*
+        
         logging(logginglevel,'y',"msg sending .. ")
+        console.log("****************************************");
         channel.send(message);
-        */
+        
     }
     
 

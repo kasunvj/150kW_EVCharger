@@ -4,7 +4,10 @@ base.js : working code
     o- canlist.json : generate as a output of calling of command 10, sync 
 
     node base.js opmode loglevel
-        opmode :  2- CAN bus listen off mode
+        opmode :  0 : normal operation mdode
+                  1 : user input incomng msg
+                        canid: 080a2240 (sync,cc(p:0,b:2),nc(p:0,b:0))
+                  2 : sending can messges 
                   other- normal working
         loglevel: 0- No logs
                   1- all logs colored

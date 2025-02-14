@@ -73,7 +73,7 @@ async function navigatePages() {
       } 
       else if (selection === 'Responce') {
         str = str + "cmdtyp: responce, \n";
-        type = canbus.type.responce;
+        type = canbus.type.response;
         currentPage = 1;      
       }
 
@@ -147,7 +147,7 @@ async function navigatePages() {
         command = canbus.command.set_ota.number;
       } else if (selection === '0x01') {
         str = str + "01 set_config nc->any, \n";
-        command = canbus.command.set_config.number.number;
+        command = canbus.command.set_config.number;
       } else if (selection === '0x02') {
         str = str + "02 set_voltagecurent pc->cc, \n";
         command = canbus.command.set_voltagecurent.number;
@@ -185,6 +185,7 @@ async function navigatePages() {
         currentPage = 4;
       }
       
+      console.log(">>>>>",command)
 
       secondbyte = parseInt(command);
       console.log(`\x1b[93m${firstbyte.toString(2).padStart(8,'0')} ${secondbyte.toString(2).padStart(8,'0')}\x1b[00m`);

@@ -1,10 +1,12 @@
-const { CanModule } = require('./lib/can-test.js');
+const {  Comm , Decoder, Encoder} = require('./lib/can-test2.js');
 const canbus = require('./nodecan.json');
 const testCases = require('./test_cases.json');
 const { logger } = require('./lib/log.js');
 const { CodeGen } = require('ajv');
-const can = new CanModule();
 
+const can = new Comm();
+const decoder = new Decoder(can);
+const encoder = new Encoder(can);
 
 function test_message_encode_and_decode(){
     /**
@@ -24,10 +26,10 @@ function test_message_encode_and_decode(){
      
     for (var i=0; i< cases.length ; i++ ){
         console.log(`--------- Test ${i} start`);
-       buf = can.encode(cases[i][0],cases[i][1],cases[i][2],cases[i][3],cases[i][4],cases[i][5],cases[i][6],cases[i][7],cases[i][8],'');
+       buf = encoder.encode(cases[i][0],cases[i][1],cases[i][2],cases[i][3],cases[i][4],cases[i][5],cases[i][6],cases[i][7],cases[i][8],'');
        msg.id = buf[3] + (buf[2] << 8) + (buf[1] << 16 ) + (buf[0] << 24) ; // calculate the id in integer based on the 4 byte buffer 
 
-       result = can.decode(msg);
+       result = decoder.decode(msg);
        console.log(`${cases[i][1]} ${parseInt(result[1])} ${cases[i][2]} ${parseInt(result[2])}`);
        
         (canbus["source"]["type"][cases[i][0]] == parseInt(result[0]))?  element_pass_count++ : console.log("❌ 0 test fail ");
@@ -41,6 +43,7 @@ function test_message_encode_and_decode(){
         (canbus["command"][cases[i][8]]["number"] == parseInt(result[8])) ? element_pass_count++ : console.log("❌ 8 test fail ");
 
         console.log(`--------- Test ${i} end`);
+        
     
     }
     console.log("\n\n\n\n")

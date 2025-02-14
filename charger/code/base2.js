@@ -9,7 +9,7 @@
  *            1: colord logs
  */
 
-const { Comm } = require('./lib/can-test.js');
+const { Comm, Decoder, Encoder } = require('./lib/can-test2.js');
 const canbus = require('./nodecan.json');
 const { logger } = require('./lib/log.js');
 
@@ -24,8 +24,8 @@ const rl = readline.createInterface({
 });
 
 const can = new Comm();
-//const decoder = new Decoder(can);
-//const encoder = new Encoder(can);
+const decoder = new Decoder(can);
+const encoder = new Encoder(can);
 
 
 var cancomm = {
@@ -70,7 +70,7 @@ async function dothis(opmode){
         while(true){
           const input = await test_getUserInput('id(hex) 12345678: ');
           msg.id = parseInt(input,16);
-          can.decode(msg);
+          decoder.decode(msg);
         }
 
         break;
