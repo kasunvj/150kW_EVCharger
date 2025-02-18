@@ -1,17 +1,20 @@
 #include<iostream>
 #include "nodecan.hpp"
 #include "socketcan_cpp/socketcan_cpp/socketcan_cpp.h"
-#include <vector>
-#include <memory>
 
 int main(){
+    //reading the protocol
     Protocol prot; 
 
-    vector<unique_ptr<Device>> devices;
-    initializeDevices(devices);
+    //walkin
+    initializeDevices();
 
+    //processing incomming messges
     scpp::SocketCan can;
     processCANMessages(can);
+
+    //sending messges
+    sendCANMessages("NC",0,0,"BR",0,0,"REQ","NOR","NET_SYNC","");
 
 
     return 0;

@@ -5,8 +5,8 @@
 #include "socketcan_cpp/socketcan_cpp/socketcan_cpp.h"
 #include "rapidjson/filereadstream.h"
 #include <iostream>
-#include <vector>
 #include <memory>
+#include <array>
 
 #define PROTOCOL_FNAME "nodecan.json"
 #define MAX_DEVICES_PER_POST 5
@@ -19,7 +19,7 @@ public:
     int postId;
     int boardId;
     virtual void init() const = 0;
-    // virtual ~Device() = default;
+    virtual ~Device() = default;
 };
 
 class NetworkControllers : public Device {
@@ -44,14 +44,19 @@ public:
 
 class Encoder : public Protocol{
 public:
-    void readprotdata();
+    void writePortData();
 };
-class Decoder {};
+
+class Decoder : public Protocol {
+public:
+    void readPortData();
+};
+
 class Listener{};
 class Writer {};
 
 int loadConfig(Document& nodecan);
-void initializeDevices(vector<unique_ptr<Device>>& devices);
+void initializeDevices();
 int processCANMessages(scpp::SocketCan& can);
 
 #endif // NODECAN_HPP

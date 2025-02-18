@@ -1,5 +1,7 @@
  #include "nodecan.hpp"
 
+#define SIZE 5
+
 using namespace std; 
 using namespace rapidjson; 
 
@@ -19,7 +21,11 @@ Protocol :: Protocol(){
         complete();
 };
 
-void Encoder :: readprotdata(){
+void Decoder :: readPortData(){
+     cout << "Loading NodeCAN protocol from Encoder : " << doc["version"].GetString() << endl;
+}
+
+void Encoder :: writePortData(){
     cout << "Loading NodeCAN protocol from Encoder : " << doc["version"].GetString() << endl;
 }
 
@@ -33,11 +39,15 @@ void Protocol :: complete(){
 };
 
 
-void initializeDevices(vector<unique_ptr<Device>>& devices){
-    devices.push_back(make_unique<NetworkControllers>());
-    devices.push_back(make_unique<PortControllers>());
-    for(const auto& dev : devices){
-        dev->init();
+void initializeDevices(){
+    array<std::unique_ptr<Device>, SIZE> devices;
+    int count = 0;
+
+    devices[0] = make_unique<NetworkControllers>();
+    devices[1] = make_unique<PortControllers>();
+    
+    for (int i=0; i< 2 ; i++ ) {
+        devices[i]->init();
     }
 };
 
@@ -49,7 +59,7 @@ int processCANMessages(scpp::SocketCan& can){
         return 1;
     }
 
-    Encoder encoder;
+    Decoder decoder;
 
     scpp::CanFrame fr;
     while(1){
@@ -60,6 +70,6 @@ int processCANMessages(scpp::SocketCan& can){
         }
 
         
-        //encoder.readprotdata();
+        decoder.readPortData();
     }
 };
