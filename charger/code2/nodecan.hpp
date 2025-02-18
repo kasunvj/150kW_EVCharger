@@ -58,5 +58,15 @@ class Writer {};
 int loadConfig(Document& nodecan);
 void initializeDevices();
 int processCANMessages(scpp::SocketCan& can);
+void sendCANMessages(string source,
+                     int postid_s, 
+                     int boardid_s, 
+                     string dest,
+                     int post_d,
+                     int boardid_d,
+                     string type,
+                     string error,
+                     string command,
+                     string data);
 
 #endif // NODECAN_HPP
