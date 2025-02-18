@@ -1,0 +1,11 @@
+nodecan.cpp
+    require rapidjson
+    download zip file from https://github.com/Tencent/rapidjson.git
+    copy include/rapidjson to the folder
+    g++ nodecan.cpp -o nodecan_test -Iinclude -lsocketcan_cpp
+
+main.cpp
+    + nodecan.hpp
+    + nodecan.cpp
+    
+    g++ main.cpp nodecan.cpp -o main -I include -lsocketcan_cpp
