@@ -10,10 +10,15 @@ int main(){
     initializeDevices();
 
     //processing incomming messges
-    scpp::SocketCan can;
-    processCANMessages(can);
+    
+    thread receiver(processCANMessages);
+    thread sender(sendCANMessagesDummy);
+
+    sender.join();
+    receiver.join();
 
     //sending messges
+    cout<< "sending msgs"<<endl;
     sendCANMessages("NC",0,0,"BR",0,0,"REQ","NOR","NET_SYNC","");
 
 

@@ -5,6 +5,8 @@
 using namespace std; 
 using namespace rapidjson; 
 
+scpp::SocketCan can;
+
 void NetworkControllers :: init() const {
     cout << "Network Controller Speaking"<< endl;
 };
@@ -21,13 +23,15 @@ Protocol :: Protocol(){
         complete();
 };
 
-void Decoder :: readPortData(){
+void Decoder :: readProtocolData(){
      cout << "Loading NodeCAN protocol from Encoder : " << doc["version"].GetString() << endl;
 }
 
-void Encoder :: writePortData(){
+void Encoder :: writeProtocolData(){
     cout << "Loading NodeCAN protocol from Encoder : " << doc["version"].GetString() << endl;
+
 }
+Encoder encoder;
 
 void Protocol :: complete(){
     if (doc.HasParseError()) {
@@ -51,7 +55,7 @@ void initializeDevices(){
     }
 };
 
-int processCANMessages(scpp::SocketCan& can){
+int processCANMessages(){
     if(can.open("can0") == scpp::STATUS_OK){
         cout << "CAN - ok" << endl;
     }else{
@@ -60,9 +64,10 @@ int processCANMessages(scpp::SocketCan& can){
     }
 
     Decoder decoder;
-
     scpp::CanFrame fr;
+    
     while(1){
+        std::lock_guard<std::mutex> lock(cout_mutex);
         if(can.read(fr) == scpp::STATUS_OK){
             printf("len %d byte, id: %x, data: %02x %02x %02x %02x %02x %02x %02x %02x  \n", fr.len, fr.id, 
                     fr.data[0], fr.data[1], fr.data[2], fr.data[3],
@@ -70,6 +75,20 @@ int processCANMessages(scpp::SocketCan& can){
         }
 
         
-        decoder.readPortData();
+        //decoder.readProtocolData();
     }
 };
+
+void sendCANMessages(string source,int postid_s,int boardid_s, string dest,int post_d,int boardid_d,string type,string error,string command,string data){
+    
+    }
+
+void sendCANMessagesDummy(){
+    while(1){
+        this_thread::sleep_for(std::chrono::seconds(1));
+        lock_guard<std::mutex> lock(cout_mutex);
+        std::cout << "Sending data: " << count++ << std::endl;
+    }
+    
+
+}

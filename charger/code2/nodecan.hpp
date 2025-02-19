@@ -7,12 +7,17 @@
 #include <iostream>
 #include <memory>
 #include <array>
+#include <thread>
+#include <chrono>
+#include <mutex>
 
 #define PROTOCOL_FNAME "nodecan.json"
 #define MAX_DEVICES_PER_POST 5
 
 using namespace std;
 using namespace rapidjson;
+
+mutex cout_mutex; 
 
 class Device {
 public:
@@ -44,12 +49,12 @@ public:
 
 class Encoder : public Protocol{
 public:
-    void writePortData();
+    void writeProtocolData();
 };
 
 class Decoder : public Protocol {
 public:
-    void readPortData();
+    void readProtocolData();
 };
 
 class Listener{};
@@ -68,5 +73,6 @@ void sendCANMessages(string source,
                      string error,
                      string command,
                      string data);
+void sendCANMessagesDummy();
 
 #endif // NODECAN_HPP
