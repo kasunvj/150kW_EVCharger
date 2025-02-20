@@ -17,7 +17,66 @@
 using namespace std;
 using namespace rapidjson;
 
-mutex cout_mutex; 
+class Message{
+private:
+    string source;
+    int postid_s; 
+    int boardid_s; 
+    string dest;
+    int postid_d;
+    int boardid_d;
+    string type;
+    string error;
+    string command;
+    string data; 
+
+public:
+    Message(string src = "", int pid_s = 0, int bid_s = 0,
+            string dst = "", int pid_d = 0, int bid_d = 0,
+            string typ = "", string err = "", string cmd = "", string dat = "")
+        : source(src), postid_s(pid_s), boardid_s(bid_s),
+          dest(dst), postid_d(pid_d), boardid_d(bid_d),
+          type(typ), error(err), command(cmd), data(dat) {}
+    
+    void display() const {
+        cout << "Message from " << source << " to " << dest
+             << " | Type: " << type << " | Command: " << command
+             << " | Data: " << data << endl;
+    }
+
+    void setMessage(string source,
+                            int postid_s, 
+                            int boardid_s, 
+                            string dest,
+                            int postid_d,
+                            int boardid_d,
+                            string type,
+                            string error,
+                            string command,
+                            string data);
+
+
+};
+
+class ReceiveRawMsg {
+private: 
+    unsigned int id;
+    unsigned int data[8];
+public:
+    void set(scpp::CanFrame frame);
+    unsigned int getId();
+    unsigned int* getData();
+};
+
+
+class TransmitRawMsg {
+private: 
+    int id;
+    int data[8];
+public:
+    void set();
+};
+
 
 class Device {
 public:
@@ -48,13 +107,24 @@ public:
 };
 
 class Encoder : public Protocol{
+private:
+    string source;
+    int postid_s; 
+    int boardid_s; 
+    string dest;
+    int post_d;
+    int boardid_d;
+    string type;
+    string error;
+    string command;
+    string data;
 public:
     void writeProtocolData();
 };
 
 class Decoder : public Protocol {
 public:
-    void readProtocolData();
+    void readProtocolData(ReceiveRawMsg msgreadinstance);
 };
 
 class Listener{};
@@ -62,7 +132,10 @@ class Writer {};
 
 int loadConfig(Document& nodecan);
 void initializeDevices();
-int processCANMessages(scpp::SocketCan& can);
+void processCANMessages();
+void sendCANMessages();
+void send(Message& msg);
+/*
 void sendCANMessages(string source,
                      int postid_s, 
                      int boardid_s, 
@@ -73,6 +146,7 @@ void sendCANMessages(string source,
                      string error,
                      string command,
                      string data);
-void sendCANMessagesDummy();
+*/
+
 
 #endif // NODECAN_HPP

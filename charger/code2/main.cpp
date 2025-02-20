@@ -1,9 +1,12 @@
 #include<iostream>
 #include "nodecan.hpp"
 #include "socketcan_cpp/socketcan_cpp/socketcan_cpp.h"
+using namespace std;
+
 
 int main(){
     //reading the protocol
+    cout << "starting"<< endl;
     Protocol prot; 
 
     //walkin
@@ -12,15 +15,20 @@ int main(){
     //processing incomming messges
     
     thread receiver(processCANMessages);
-    thread sender(sendCANMessagesDummy);
+    thread sender(sendCANMessages);
+    
 
-    sender.join();
-    receiver.join();
-
+    cout << "sending msgs...................."<< endl;
     //sending messges
-    cout<< "sending msgs"<<endl;
-    sendCANMessages("NC",0,0,"BR",0,0,"REQ","NOR","NET_SYNC","");
+    
+    Message msg1("NC",0,0,"PC",0,0,"REQ","NOR","NET_SYNC","");
+    Message msg2("NC",0,0,"CC",0,0,"REQ","NOR","NET_SYNC","");
+    send(msg1);
+    send(msg1);
+    send(msg2);
+    cout << "sending msgs...................."<< endl;
 
-
+    receiver.join();
+    sender.join();
     return 0;
 }
