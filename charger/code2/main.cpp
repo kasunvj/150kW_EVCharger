@@ -21,8 +21,8 @@ int main(){
     cout << "sending msgs...................."<< endl;
     //sending messges
     
-    Message msg1("NC",0,0,"PC",0,0,"REQ","NOR","NET_SYNC","");
-    Message msg2("NC",0,0,"CC",0,0,"REQ","NOR","NET_SYNC","");
+    Message msg1("nc",0,0,"pc",0,0,"request","normal","net_sync","");
+    Message msg2("nc",0,0,"pc",0,0,"request","normal","net_sync","");
     send(msg1);
     send(msg1);
     send(msg2);

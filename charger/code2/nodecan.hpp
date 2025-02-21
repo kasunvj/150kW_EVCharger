@@ -1,3 +1,5 @@
+// Issue : public attributes on emssage
+
 #ifndef NODECAN_HPP
 #define NODECAN_HPP
 
@@ -18,7 +20,7 @@ using namespace std;
 using namespace rapidjson;
 
 class Message{
-private:
+public:
     string source;
     int postid_s; 
     int boardid_s; 
@@ -27,7 +29,7 @@ private:
     int boardid_d;
     string type;
     string error;
-    string command;
+    string devcommand;
     string data; 
 
 public:
@@ -36,11 +38,11 @@ public:
             string typ = "", string err = "", string cmd = "", string dat = "")
         : source(src), postid_s(pid_s), boardid_s(bid_s),
           dest(dst), postid_d(pid_d), boardid_d(bid_d),
-          type(typ), error(err), command(cmd), data(dat) {}
+          type(typ), error(err), devcommand(cmd), data(dat) {}
     
     void display() const {
         cout << "Message from " << source << " to " << dest
-             << " | Type: " << type << " | Command: " << command
+             << " | Type: " << type << " | Command: " << devcommand
              << " | Data: " << data << endl;
     }
 
@@ -119,7 +121,7 @@ private:
     string command;
     string data;
 public:
-    void writeProtocolData();
+    int writeProtocolData(Message& msg);
 };
 
 class Decoder : public Protocol {

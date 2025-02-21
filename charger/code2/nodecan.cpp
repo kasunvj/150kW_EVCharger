@@ -12,7 +12,199 @@ mutex cout_mutex;
 ReceiveRawMsg receiveRawMsg;
 TransmitRawMsg transmitRawMsg;
 
-class CircularBuffer{
+
+union ID{
+    struct{
+       unsigned int desBoard : 3 ;
+       unsigned int desPost :  2 ;
+       unsigned int desType :  3 ;
+       unsigned int srcBoard : 3 ;
+       unsigned int srcPost :  2 ;
+       unsigned int srcType :  3 ;
+       unsigned int cmd :      8 ;
+       unsigned int err :      3 ;
+       unsigned int cmdType :  2 ;
+       unsigned int unalloc :  3 ;
+    } bits;
+    uint32_t canId;
+}id;
+
+struct CommandType{
+    unsigned int reqest =   0;
+    unsigned int responce = 1;
+    unsigned int getNumb(string type){
+        if(type.compare("request") == 0)
+            return reqest;
+        else if(type.compare("responce") == 0) 
+            return responce;
+        else
+            return 0;
+    }
+    string getName(int type){
+        switch(type){
+            case 0:
+                return "request";break;
+            case 1:
+                return "responce";break;
+            default:
+                return "Not defined"; break;
+        }  
+    }
+}commandType;
+
+struct ErrorType{ 
+    unsigned int normal =    0;
+    unsigned int fault =     1;
+    unsigned int busy =      2;
+    unsigned int invalcmd =  3;
+    unsigned int invaldata = 4;
+    unsigned int getNumb(string type){
+        if(type.compare("normal") == 0)
+            return normal;
+        else if(type.compare("fault") == 0) 
+            return fault;
+        else if(type.compare("busy") == 0) 
+            return busy;
+        else if(type.compare("invalcmd") == 0) 
+            return invalcmd;
+        else if(type.compare("invaldata") == 0) 
+            return invaldata;
+        else
+            return 0;
+    };
+    string getName(int type){
+        switch(type){
+            case 0:
+                return "normal";break;
+            case 1:
+                return "fault";break;
+            case 2:
+                return "busy";break;
+            case 3:
+                return "responce";break;
+            case 4:
+                return "invaldata";break;
+            default:
+                return "Not defined"; break;
+        }  
+    }
+
+    
+}errorType;
+
+struct NodeType{
+    unsigned int pc =  0;
+    unsigned int cc =  1;
+    unsigned int nc =  2;
+    unsigned int tmc = 3;
+    unsigned int esc = 4;
+    unsigned int brd = 5;
+    unsigned int getNumb(string type){
+        if(type.compare("pc") == 0)
+            return pc;
+        else if(type.compare("cc") == 0) 
+            return cc;
+        else if(type.compare("nc") == 0) 
+            return nc;
+        else if(type.compare("tmc") == 0) 
+            return tmc;
+        else if(type.compare("esc") == 0) 
+            return esc;
+        else if(type.compare("brd") == 0) 
+            return brd;
+        else
+            return 0;
+    }
+    string getName(int type){
+        switch(type){
+            case 0:
+                return "pc";break;
+            case 1:
+                return "cc";break;
+            case 2:
+                return "nc";break;
+            case 3:
+                return "tmc";break;
+            case 4:
+                return "esc";break;
+            case 5:
+                return "brd";break;
+            default:
+                return "Not defined"; break;
+        }  
+    }
+}nodeType;
+
+struct Command{
+    unsigned int set_ota =            0;
+    unsigned int set_config =         1;
+    unsigned int set_voltagecurent =  2;
+    unsigned int get_maxvoltage =     3;
+    unsigned int set_portauth =       4;
+    unsigned int get_portmesurement = 5;
+    unsigned int set_tmctemp =        6;
+    unsigned int set_escstate =       7;
+    unsigned int set_maxpower =       8;
+    unsigned int set_logdata =        9;
+    unsigned int net_sync =          10;
+
+    unsigned int getNumb(string type){
+        if(type.compare("set_ota") == 0)
+            return set_ota;
+        else if(type.compare("set_config") == 0) 
+            return set_config;
+        else if(type.compare("set_voltagecurent") == 0) 
+            return set_voltagecurent;
+        else if(type.compare("get_maxvoltage") == 0) 
+            return get_maxvoltage;
+        else if(type.compare("set_portauth") == 0) 
+            return set_portauth;
+        else if(type.compare("get_portmesurement") == 0) 
+            return get_portmesurement;
+        else if(type.compare("set_tmctemp") == 0) 
+            return set_tmctemp;
+        else if(type.compare("set_escstate") == 0) 
+            return set_escstate ;
+        else if(type.compare("set_maxpower") == 0) 
+            return set_maxpower;
+        else if(type.compare("set_logdata") == 0) 
+            return set_logdata;
+        else if(type.compare("net_sync") == 0) 
+            return net_sync;
+        else
+            return 9;
+    };
+    string getName(int type){
+        switch(type){
+            case 0:
+                return "set_ota";break;
+            case 1:
+                return "set_config";break;
+            case 2:
+                return "set_voltagecurent";break;
+            case 3:
+                return "get_maxvoltage";break;
+            case 4:
+                return "set_portauth";break;
+            case 5:
+                return "get_portmesurement";break;
+            case 6:
+                return "set_tmctemp";break;
+            case 7:
+                return "set_escstate";break;
+            case 8:
+                return "set_maxpower";break;
+            case 9:
+                return "set_logdata";break;
+            case 10:
+                return "net_sync";break;
+            default:
+                return "Not defined"; break;
+        }  
+    }
+}command;
+
+class TxBuffer{
     private:
         Message buffer[SIZE]; 
         int head,tail;
@@ -20,7 +212,7 @@ class CircularBuffer{
         bool isFull;
     
     public:
-        CircularBuffer() : head(0), tail(0), isFull(false) {}
+        TxBuffer() : head(0), tail(0), isFull(false) {}
     
     bool isEmpty(){
         return (!isFull && (head==tail) );
@@ -79,9 +271,7 @@ class CircularBuffer{
 
 
 };
-CircularBuffer cb;
-
-
+TxBuffer cb;
 
 void NetworkControllers :: init() const {
     cout << "Network Controller Speaking"<< endl;
@@ -90,7 +280,6 @@ void NetworkControllers :: init() const {
 void PortControllers :: init() const {
     cout << "Port Controller Speaking"<< endl;
 };
-
 
 Protocol :: Protocol(){
         fp = fopen(PROTOCOL_FNAME, "r");
@@ -105,9 +294,33 @@ void Decoder :: readProtocolData(ReceiveRawMsg msgreadinstance){
 
 };
 
-void Encoder :: writeProtocolData(){
-    cout << "Loading NodeCAN protocol from Encoder : " << doc["version"].GetString() << endl;
+int Encoder :: writeProtocolData(Message& msg){
+    cout << "Encoding using NodeCAN " << doc["version"].GetString() << endl;
 
+    cout << nodeType.getName(nodeType.getNumb(msg.dest)) <<endl;
+    cout << nodeType.getName(nodeType.getNumb(msg.source)) <<endl;
+    cout << command.getName(command.getNumb(msg.devcommand)) <<endl;
+    cout << errorType.getName(errorType.getNumb(msg.error)) <<endl;
+    cout << commandType.getName(commandType.getNumb(msg.type)) <<endl;
+
+    id.bits.desBoard = msg.boardid_d;
+    id.bits.desPost = msg.postid_d;
+    id.bits.desType = nodeType.getNumb(msg.dest);
+    id.bits.srcBoard = msg.boardid_s;
+    id.bits.srcPost = msg.postid_s;
+    id.bits.srcType = nodeType.getNumb(msg.source);
+    id.bits.cmd = command.getNumb(msg.devcommand);
+    id.bits.err = errorType.getNumb(msg.error);
+    id.bits.cmdType = commandType.getNumb(msg.type);
+    id.bits.unalloc = 0;
+
+    cout << "---------------" <<endl;
+
+    printf("%d %x\n",id.canId,id.canId);
+
+    cout << "---------------" <<endl;
+
+    return 0;
 };
 
 
@@ -173,10 +386,11 @@ void sendCANMessages(){
             cout << "head: "<< cb.getHead() << "    tail: "<<cb.getTail()<<endl;
             Message sendme;
             cb.pop(sendme);
+            int id = encoder.writeProtocolData(sendme);
             sendme.display();
             cout << "sending ++++++++++++++++++++++" << endl;
         }
-        encoder.writeProtocolData();
+        
     }
 };
 
@@ -211,7 +425,7 @@ void Message :: setMessage(string source,
                             int boardid_d,
                             string type,
                             string error,
-                            string command,
+                            string devcommand,
                             string data){
     source = source;
     postid_s = postid_s;
@@ -221,7 +435,7 @@ void Message :: setMessage(string source,
     boardid_d = boardid_d;
     type = type;
     error = error;
-    command = command;
+    devcommand = devcommand;
     data = data;
 };
 
