@@ -3,9 +3,10 @@
 #ifndef NODECAN_HPP
 #define NODECAN_HPP
 
-#include "rapidjson/document.h"
-#include "socketcan_cpp/socketcan_cpp/socketcan_cpp.h"
-#include "rapidjson/filereadstream.h"
+//#include "rapidjson/document.h"
+//#include "socketcan_cpp/socketcan_cpp/socketcan_cpp.h"
+//#include "rapidjson/filereadstream.h"
+#include "socketcan_cpp/socketcan_cpp.h"
 #include <iostream>
 #include <memory>
 #include <array>
@@ -17,7 +18,7 @@
 #define MAX_DEVICES_PER_POST 5
 
 using namespace std;
-using namespace rapidjson;
+//using namespace rapidjson;
 
 class Message{
 public:
@@ -99,16 +100,20 @@ public:
     void init() const override;
 };
 
+/*
 class Protocol {
 public:
+    
     Document doc;
     FILE* fp;
     char readBuffer[65536]; //2^16
+    
     Protocol();
     void complete();
 };
+*/
 
-class Encoder : public Protocol{
+class Encoder {
 private:
     string source;
     int postid_s; 
@@ -124,7 +129,7 @@ public:
     int writeProtocolData(Message& msg);
 };
 
-class Decoder : public Protocol {
+class Decoder {
 public:
     void readProtocolData(ReceiveRawMsg msgreadinstance);
 };
@@ -132,7 +137,7 @@ public:
 class Listener{};
 class Writer {};
 
-int loadConfig(Document& nodecan);
+//int loadConfig(Document& nodecan);
 void initializeDevices();
 void processCANMessages();
 void sendCANMessages();

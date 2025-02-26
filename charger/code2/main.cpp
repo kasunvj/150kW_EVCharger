@@ -1,13 +1,14 @@
 #include<iostream>
 #include "nodecan.hpp"
-#include "socketcan_cpp/socketcan_cpp/socketcan_cpp.h"
+//#include "socketcan_cpp/socketcan_cpp/socketcan_cpp.h"
+#include "socketcan_cpp/socketcan_cpp.h"
 using namespace std;
 
 
 int main(){
     //reading the protocol
     cout << "starting"<< endl;
-    Protocol prot; 
+    //Protocol prot; 
 
     //walkin
     initializeDevices();

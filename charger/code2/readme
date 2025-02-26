@@ -11,3 +11,8 @@ main.cpp
     + nodecan.cpp
     
     g++ main.cpp nodecan.cpp -o main -I include -lsocketcan_cpp
+    g++ main.cpp nodecan.cpp -o main -I/usr/local/include -L/usr/local/lib -lsocketcan_cpp
+    g++ -I socketcan-cpp/include socketcan-cpp/src/socketcan_cpp.cpp main.cpp nodecan.cpp -o main
+    g++ main.cpp nodecan.cpp -o main -I socketcan-cpp/include -I  socketcan-cpp/build/gen -L socketcan-cpp/build -lsocketcan_cpp
+test/socketcan.cpp
+    g++ socketcan.cpp -o socketcan -I include -lsocketcan_cpp

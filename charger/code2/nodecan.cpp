@@ -3,7 +3,7 @@
 #define SIZE 5
 
 using namespace std; 
-using namespace rapidjson; 
+//using namespace rapidjson; 
 
 scpp::SocketCan can;
 Encoder encoder;
@@ -28,6 +28,20 @@ union ID{
     } bits;
     uint32_t canId;
 }id;
+
+union Data{
+    struct{
+        unsigned int byte1 : 8 ;
+        unsigned int byte2 : 8 ;
+        unsigned int byte3 : 8 ;
+        unsigned int byte4 : 8 ;
+        unsigned int byte5 : 8 ;
+        unsigned int byte6 : 8 ;
+        unsigned int byte7 : 8 ;
+        unsigned int byte8 : 8 ;
+    }bits;
+    uint32_t canData;
+}data;
 
 struct CommandType{
     unsigned int reqest =   0;
@@ -202,7 +216,7 @@ struct Command{
                 return "Not defined"; break;
         }  
     }
-}command;
+}commandName;
 
 class TxBuffer{
     private:
@@ -271,7 +285,7 @@ class TxBuffer{
 
 
 };
-TxBuffer cb;
+TxBuffer txbuf;
 
 void NetworkControllers :: init() const {
     cout << "Network Controller Speaking"<< endl;
@@ -281,38 +295,42 @@ void PortControllers :: init() const {
     cout << "Port Controller Speaking"<< endl;
 };
 
+/*
 Protocol :: Protocol(){
         fp = fopen(PROTOCOL_FNAME, "r");
         FileReadStream is(fp, readBuffer, sizeof(readBuffer));
         doc.ParseStream(is);
         complete();
 };
-
+*/
 void Decoder :: readProtocolData(ReceiveRawMsg msgreadinstance){
-     cout << "Loading NodeCAN protocol from Encoder : " << doc["version"].GetString() << endl;
+     //cout << "Loading NodeCAN protocol from Encoder : " << doc["version"].GetString() << endl;
      printf("Decoder : id: %x \n",msgreadinstance.getId());
 
 };
 
 int Encoder :: writeProtocolData(Message& msg){
-    cout << "Encoding using NodeCAN " << doc["version"].GetString() << endl;
+    //cout << "Encoding using NodeCAN " << doc["version"].GetString() << endl;
 
     cout << nodeType.getName(nodeType.getNumb(msg.dest)) <<endl;
     cout << nodeType.getName(nodeType.getNumb(msg.source)) <<endl;
-    cout << command.getName(command.getNumb(msg.devcommand)) <<endl;
+    cout << commandName.getName(commandName.getNumb(msg.devcommand)) <<endl;
     cout << errorType.getName(errorType.getNumb(msg.error)) <<endl;
     cout << commandType.getName(commandType.getNumb(msg.type)) <<endl;
 
+    //prepare CANID
     id.bits.desBoard = msg.boardid_d;
     id.bits.desPost = msg.postid_d;
     id.bits.desType = nodeType.getNumb(msg.dest);
     id.bits.srcBoard = msg.boardid_s;
     id.bits.srcPost = msg.postid_s;
     id.bits.srcType = nodeType.getNumb(msg.source);
-    id.bits.cmd = command.getNumb(msg.devcommand);
+    id.bits.cmd = commandName.getNumb(msg.devcommand);
     id.bits.err = errorType.getNumb(msg.error);
     id.bits.cmdType = commandType.getNumb(msg.type);
     id.bits.unalloc = 0;
+
+    //prepare CANData
 
     cout << "---------------" <<endl;
 
@@ -320,10 +338,57 @@ int Encoder :: writeProtocolData(Message& msg){
 
     cout << "---------------" <<endl;
 
+    //shoot to CAN bus
+    /*
+    scpp::CanFrame cf_to_write;
+        
+    cf_to_write.id = 123;
+    cf_to_write.len = 8;
+    for (int i = 0; i < 8; ++i)
+        cf_to_write.data[i] = j & (254);
+    auto write_sc_status = can.write(cf_to_write);
+    if (write_sc_status != scpp::STATUS_OK)
+        printf("something went wrong on socket write, error code : %d \n", int32_t(write_sc_status));
+    else
+        printf("Message was written to the socket \n");
+    */
+    if (can.open("can0") == scpp::STATUS_OK)
+    {
+    for (int j = 0; j < 20000; ++j)
+    { 
+        
+        scpp::CanFrame fr;
+        
+        while(can.read(fr) == scpp::STATUS_OK)
+        {
+            printf("len %d byte, id: %d, data: %02x %02x %02x %02x %02x %02x %02x %02x  \n", fr.len, fr.id, 
+                fr.data[0], fr.data[1], fr.data[2], fr.data[3],
+                fr.data[4], fr.data[5], fr.data[6], fr.data[7]);
+        }
+        
+
+        scpp::CanFrame cf_to_write;
+        
+        cf_to_write.id = 123;
+        cf_to_write.len = 8;
+        for (int i = 0; i < 8; ++i)
+            cf_to_write.data[i] = j & (254);
+        auto write_sc_status = can.write(cf_to_write);
+        if (write_sc_status != scpp::STATUS_OK)
+            printf("something went wrong on socket write, error code : %d \n", int32_t(write_sc_status));
+        else
+            printf("Message was written to the socket \n");
+    }
+    }
+    else
+    {
+        printf("Cannot open can socket!");
+    }
+
     return 0;
 };
 
-
+/*
 void Protocol :: complete(){
     if (doc.HasParseError()) {
         cerr << "Error: Failed to parse " << PROTOCOL_FNAME << endl;
@@ -332,6 +397,7 @@ void Protocol :: complete(){
     cout << "Loading NodeCAN protocol : " << doc["version"].GetString() << endl;
     fclose(fp);
 };
+*/
 
 
 void initializeDevices(){
@@ -357,6 +423,7 @@ void processCANMessages(){
     scpp::CanFrame fr;
     
     while(1){
+        /*
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
         std::lock_guard<std::mutex> lock(cout_mutex);
         if(can.read(fr) == scpp::STATUS_OK){
@@ -369,6 +436,7 @@ void processCANMessages(){
             printf("Reading id %x data from instance \n",receiveRawMsg.getId());
             
         }
+        */
 
         
         //decoder.readProtocolData();
@@ -381,11 +449,11 @@ void sendCANMessages(){
         std::this_thread::sleep_for(std::chrono::milliseconds(5000));
         std::lock_guard<std::mutex> lock(cout_mutex);
         cout << "Sending data: " << endl;
-        if(!cb.isEmpty()){
+        if(!txbuf.isEmpty()){
             cout << "sending ++++++++++++++++++++++" << endl;
-            cout << "head: "<< cb.getHead() << "    tail: "<<cb.getTail()<<endl;
+            cout << "head: "<< txbuf.getHead() << "    tail: "<<txbuf.getTail()<<endl;
             Message sendme;
-            cb.pop(sendme);
+            txbuf.pop(sendme);
             int id = encoder.writeProtocolData(sendme);
             sendme.display();
             cout << "sending ++++++++++++++++++++++" << endl;
@@ -439,10 +507,13 @@ void Message :: setMessage(string source,
     data = data;
 };
 
-
+/*
+Avtivity: send can packet object to the buffer 
+@parm Messge object with defined ID written in human readble attribute values
+*/
 void send(Message& msg){
-    cb.push(msg);
-    cb.display();
+    txbuf.push(msg); //pushing msg object to the buffer. msg object has human readble values
+    txbuf.display();
 };
 
 
