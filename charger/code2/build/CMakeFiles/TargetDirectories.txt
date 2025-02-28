@@ -1,0 +1,16 @@
+/home/vegaav/150kW_EVCharger/charger/code2/build/CMakeFiles/ncmain.dir
+/home/vegaav/150kW_EVCharger/charger/code2/build/CMakeFiles/edit_cache.dir
+/home/vegaav/150kW_EVCharger/charger/code2/build/CMakeFiles/rebuild_cache.dir
+/home/vegaav/150kW_EVCharger/charger/code2/build/CMakeFiles/list_install_components.dir
+/home/vegaav/150kW_EVCharger/charger/code2/build/CMakeFiles/install.dir
+/home/vegaav/150kW_EVCharger/charger/code2/build/CMakeFiles/install/local.dir
+/home/vegaav/150kW_EVCharger/charger/code2/build/CMakeFiles/install/strip.dir
+/home/vegaav/150kW_EVCharger/charger/code2/build/socketcan-cpp/CMakeFiles/socketcan_cpp.dir
+/home/vegaav/150kW_EVCharger/charger/code2/build/socketcan-cpp/CMakeFiles/read_write.dir
+/home/vegaav/150kW_EVCharger/charger/code2/build/socketcan-cpp/CMakeFiles/uninstall.dir
+/home/vegaav/150kW_EVCharger/charger/code2/build/socketcan-cpp/CMakeFiles/edit_cache.dir
+/home/vegaav/150kW_EVCharger/charger/code2/build/socketcan-cpp/CMakeFiles/rebuild_cache.dir
+/home/vegaav/150kW_EVCharger/charger/code2/build/socketcan-cpp/CMakeFiles/list_install_components.dir
+/home/vegaav/150kW_EVCharger/charger/code2/build/socketcan-cpp/CMakeFiles/install.dir
+/home/vegaav/150kW_EVCharger/charger/code2/build/socketcan-cpp/CMakeFiles/install/local.dir
+/home/vegaav/150kW_EVCharger/charger/code2/build/socketcan-cpp/CMakeFiles/install/strip.dir

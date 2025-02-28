@@ -1,0 +1,1 @@
+/usr/bin/c++ -rdynamic CMakeFiles/read_write.dir/examples/read_write.cpp.o -o read_write  libsocketcan_cpp.a 

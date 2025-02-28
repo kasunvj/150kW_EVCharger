@@ -1,22 +1,16 @@
-// Issue : public attributes on emssage
+#include "nodecan.hpp"
 
-#ifndef NODECAN_HPP
-#define NODECAN_HPP
-
-#include "socketcan_cpp/socketcan_cpp.h"
-#include <iostream>
-#include <memory>
-#include <array>
-#include <thread>
-#include <chrono>
-#include <mutex>
-#include <cstring>
-
-#define PROTOCOL_FNAME "nodecan.json"
-#define MAX_DEVICES_PER_POST 5
 #define SIZE 5
 
-using namespace std;
+using namespace std; 
+
+scpp::SocketCan can;
+Encoder encoder;
+Decoder decoder;
+mutex cout_mutex;
+ReceiveRawMsg receiveRawMsg;
+TransmitRawMsg transmitRawMsg;
+
 
 union ID{
     struct{
@@ -32,12 +26,21 @@ union ID{
        unsigned int unalloc :  3 ;
     } bits;
     uint32_t canId;
-};
+}id;
 
 union Data{
-    uint8_t bytes[8];
-    uint64_t canData;
-};
+    struct{
+        unsigned int byte1 : 8 ;
+        unsigned int byte2 : 8 ;
+        unsigned int byte3 : 8 ;
+        unsigned int byte4 : 8 ;
+        unsigned int byte5 : 8 ;
+        unsigned int byte6 : 8 ;
+        unsigned int byte7 : 8 ;
+        unsigned int byte8 : 8 ;
+    }bits;
+    uint32_t canData;
+}data;
 
 struct CommandType{
     unsigned int reqest =   0;
@@ -60,7 +63,7 @@ struct CommandType{
                 return "Not defined"; break;
         }  
     }
-};
+}commandType;
 
 struct ErrorType{ 
     unsigned int normal =    0;
@@ -100,7 +103,7 @@ struct ErrorType{
     }
 
     
-};
+}errorType;
 
 struct NodeType{
     unsigned int pc =  0;
@@ -143,9 +146,9 @@ struct NodeType{
                 return "Not defined"; break;
         }  
     }
-};
+}nodeType;
 
-struct CommandName{
+struct Command{
     unsigned int set_ota =            0;
     unsigned int set_config =         1;
     unsigned int set_voltagecurent =  2;
@@ -212,96 +215,14 @@ struct CommandName{
                 return "Not defined"; break;
         }  
     }
-};
-
-class Message{
-public:
-    string source;
-    int postid_s; 
-    int boardid_s; 
-    string dest;
-    int postid_d;
-    int boardid_d;
-    string type;
-    string error;
-    string devcommand;
-    string data; 
-
-public:
-    Message(string src = "", int pid_s = 0, int bid_s = 0,
-            string dst = "", int pid_d = 0, int bid_d = 0,
-            string typ = "", string err = "", string cmd = "", string dat = "")
-        : source(src), postid_s(pid_s), boardid_s(bid_s),
-          dest(dst), postid_d(pid_d), boardid_d(bid_d),
-          type(typ), error(err), devcommand(cmd), data(dat) {}
-    
-    void display() const {
-        cout << "Message from " << source << " to " << dest
-             << " | Type: " << type << " | Command: " << devcommand
-             << " | Data: " << data << endl;
-    }
-
-    void setMessage(string source,
-                            int postid_s, 
-                            int boardid_s, 
-                            string dest,
-                            int postid_d,
-                            int boardid_d,
-                            string type,
-                            string error,
-                            string command,
-                            string data);
+}commandName;
 
 
-};
-
-class ReceiveRawMsg {
-private: 
-    unsigned int id;
-    unsigned int data[8];
-public:
-    void set(scpp::CanFrame frame);
-    unsigned int getId();
-    unsigned int* getData();
-};
 
 
-class TransmitRawMsg {
-public: 
-    uint32_t id;
-    uint8_t data[8];
-public:
-    void set(const ID& msgId, const Data& msgData) {
-        id = msgId.canId;                  
-        memcpy(data, msgData.bytes, 8);
-    }
-    uint32_t getId() const { return id; }
-    const uint8_t* getData() const { return data; }
-};
-
-
-class Device {
-public:
-    int postId;
-    int boardId;
-    virtual void init() const = 0;
-    virtual ~Device() = default;
-};
-
-class NetworkControllers : public Device {
-public:
-    void init() const override;
-};
-
-class PortControllers : public Device {
-public:
-    int voltage;
-    void init() const override;
-};
-
-class TxBuffer : public TransmitRawMsg {
+class TxBuffer{
     private:
-        TransmitRawMsg buffer[SIZE]; 
+        Message buffer[SIZE]; 
         int head,tail;
         int size;
         bool isFull;
@@ -318,7 +239,7 @@ class TxBuffer : public TransmitRawMsg {
         return isFull;
         }
 
-    void push(const TransmitRawMsg& msg){
+    void push(const Message& msg){
         buffer[tail] = msg;
         tail = (tail + 1) % size;
 
@@ -337,7 +258,7 @@ class TxBuffer : public TransmitRawMsg {
         return tail;
     }
 
-    bool pop(TransmitRawMsg& msg) {
+    bool pop(Message& msg) {
         if (isEmpty()) {
             std::cerr << "Buffer Underflow!" << std::endl;
             return false;
@@ -358,7 +279,7 @@ class TxBuffer : public TransmitRawMsg {
         std::cout << "Buffer: ";
         int i = head;
         while (i != tail) {
-            //buffer[i].display();
+            buffer[i].display();
             i = (i + 1) % size;
         }
         std::cout << std::endl;
@@ -366,48 +287,184 @@ class TxBuffer : public TransmitRawMsg {
 
 
 };
+TxBuffer txbuf;
 
-class Encoder {
-private:
-    string source;
-    int postid_s; 
-    int boardid_s; 
-    string dest;
-    int post_d;
-    int boardid_d;
-    string type;
-    string error;
-    string command;
-    string data;
-public:
-    int writeProtocolData(Message& msg);
+void NetworkControllers :: init() const {
+    cout << "Network Controller Speaking"<< endl;
+};
+    
+void PortControllers :: init() const {
+    cout << "Port Controller Speaking"<< endl;
 };
 
-class Decoder {
-public:
-    void readProtocolData(ReceiveRawMsg msgreadinstance);
+void Decoder :: readProtocolData(ReceiveRawMsg msgreadinstance){
+    printf("Decoder : id: %x \n",msgreadinstance.getId());
+
 };
 
-class Listener{};
-class Writer {};
+int Encoder :: writeProtocolData(Message& msg){
+    
+    cout << nodeType.getName(nodeType.getNumb(msg.dest)) <<endl;
+    cout << nodeType.getName(nodeType.getNumb(msg.source)) <<endl;
+    cout << commandName.getName(commandName.getNumb(msg.devcommand)) <<endl;
+    cout << errorType.getName(errorType.getNumb(msg.error)) <<endl;
+    cout << commandType.getName(commandType.getNumb(msg.type)) <<endl;
 
-//int loadConfig(Document& nodecan);
-void initializeDevices();
-void processCANMessages();
-void sendCANMessages();
-void send(Message& msg);
+    //prepare CANID
+    //TODO: need to set boundaries 
+    id.bits.desBoard = msg.boardid_d;
+    id.bits.desPost = msg.postid_d;
+    id.bits.desType = nodeType.getNumb(msg.dest);
+    id.bits.srcBoard = msg.boardid_s;
+    id.bits.srcPost = msg.postid_s;
+    id.bits.srcType = nodeType.getNumb(msg.source);
+    id.bits.cmd = commandName.getNumb(msg.devcommand);
+    id.bits.err = errorType.getNumb(msg.error);
+    id.bits.cmdType = commandType.getNumb(msg.type);
+    id.bits.unalloc = 0;
+
+    //prepare CANData
+
+    cout << "---------------" <<endl;
+
+    printf("%d %x\n",id.canId,id.canId);
+
+    cout << "---------------" <<endl;
+
+    //shoot to CAN bus
+    scpp::CanFrame cf_to_write;
+        
+    cf_to_write.id = id.canId | CAN_EFF_FLAG;
+    cf_to_write.len = 8;
+    for (int i = 0; i < 8; ++i)
+        cf_to_write.data[i] = 22;
+    auto write_sc_status = can.write(cf_to_write);
+    if (write_sc_status != scpp::STATUS_OK)
+        printf("something went wrong on socket write, error code : %d \n", int32_t(write_sc_status));
+    else
+        printf("Message was written to the socket \n");
+    
+
+    return 0;
+};
+
+
+
+void initializeDevices(){
+    array<std::unique_ptr<Device>, SIZE> devices;
+    int count = 0;
+
+    devices[0] = make_unique<NetworkControllers>();
+    devices[1] = make_unique<PortControllers>();
+    
+    for (int i=0; i< 2 ; i++ ) {
+        devices[i]->init();
+    }
+    
+};
+
+void processCANMessages(){
+    if(can.open("can0") == scpp::STATUS_OK){
+        cout << "CAN - ok" << endl;
+    }else{
+        cout << "CAN - fail" << endl;
+    }
+
+    
+    scpp::CanFrame fr;
+    
+    while(1){
+        
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        std::lock_guard<std::mutex> lock(cout_mutex);
+        if(can.read(fr) == scpp::STATUS_OK){
+            printf("len %d byte, id: %x, data: %02x %02x %02x %02x %02x %02x %02x %02x  \n", fr.len, fr.id, 
+                    fr.data[0], fr.data[1], fr.data[2], fr.data[3],
+                    fr.data[4], fr.data[5], fr.data[6], fr.data[7]);
+            
+            receiveRawMsg.set(fr);
+            decoder.readProtocolData(receiveRawMsg);
+            printf("Reading id %x data from instance \n",receiveRawMsg.getId());
+            
+        }
+
+        
+        //decoder.readProtocolData();
+    }
+};
+
+//void sendCANMessages(string source,int postid_s,int boardid_s, string dest,int post_d,int boardid_d,string type,string error,string command,string data){
+void sendCANMessages(){
+    while(1){
+        std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+        std::lock_guard<std::mutex> lock(cout_mutex);
+        cout << "Sending data: " << endl;
+        if(!txbuf.isEmpty()){
+            cout << "sending ++++++++++++++++++++++" << endl;
+            cout << "head: "<< txbuf.getHead() << "    tail: "<<txbuf.getTail()<<endl;
+            Message sendme;
+            txbuf.pop(sendme);
+            int id = encoder.writeProtocolData(sendme);
+            sendme.display();
+            cout << "sending ++++++++++++++++++++++" << endl;
+        }
+        
+    }
+};
+
+
+
+void ReceiveRawMsg :: set(scpp::CanFrame frame){
+    id = frame.id;
+    for(int i= 0; i< sizeof(data)/sizeof(data[0]); i++){
+        data[i] = frame.data[i];
+    }
+};
+
+unsigned int ReceiveRawMsg :: getId(){
+    return id;
+};
+
+unsigned int* ReceiveRawMsg :: getData(){
+    return data;
+};
+
+
+void TransmitRawMsg :: set(){
+    cout << "ID set to inside instance " << id << endl;
+};
+
+
+void Message :: setMessage(string source,
+                            int postid_s, 
+                            int boardid_s, 
+                            string dest,
+                            int postid_d,
+                            int boardid_d,
+                            string type,
+                            string error,
+                            string devcommand,
+                            string data){
+    source = source;
+    postid_s = postid_s;
+    boardid_s = boardid_s;
+    dest = dest;
+    postid_d = postid_d;
+    boardid_d = boardid_d;
+    type = type;
+    error = error;
+    devcommand = devcommand;
+    data = data;
+};
+
 /*
-void sendCANMessages(string source,
-                     int postid_s, 
-                     int boardid_s, 
-                     string dest,
-                     int post_d,
-                     int boardid_d,
-                     string type,
-                     string error,
-                     string command,
-                     string data);
+Avtivity: send can packet object to the buffer 
+@parm Messge object with defined ID written in human readble attribute values
 */
+void send(Message& msg){
+    txbuf.push(msg); //pushing msg object to the buffer. msg object has human readble values
+    txbuf.display();
+};
 
 
-#endif // NODECAN_HPP
+

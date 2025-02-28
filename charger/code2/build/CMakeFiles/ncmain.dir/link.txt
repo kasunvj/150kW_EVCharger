@@ -1,0 +1,1 @@
+/usr/bin/c++ -rdynamic CMakeFiles/ncmain.dir/main.cpp.o CMakeFiles/ncmain.dir/nodecan.cpp.o -o ncmain  socketcan-cpp/libsocketcan_cpp.a 
