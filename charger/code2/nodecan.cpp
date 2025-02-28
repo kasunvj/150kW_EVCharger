@@ -11,8 +11,6 @@ TransmitRawMsg transmitRawMsg;
 TxBuffer txbuf;
 
 
-
-
 void NetworkControllers :: init() const {
     cout << "Network Controller Speaking"<< endl;
 };
@@ -61,17 +59,10 @@ int Encoder :: writeProtocolData(Message& msg){
     }
     
     cout << "---------------" <<endl;
-
     printf("%d %x\n",id.canId,id.canId);
-
     cout << "---------------" <<endl;
 
-    txmsg.id = id.canId;
-    for(int i=0;i<8;i++){
-        txmsg.data[i] = data.bytes[i];
-    }
-    
-
+    txmsg.set(id, data);
     txbuf.push(txmsg);
     
     return 0;
@@ -93,18 +84,17 @@ void initializeDevices(){
 };
 
 void processCANMessages(){
-    if(can.open("can0") == scpp::STATUS_OK){
+    if(can.open("can0") == scpp::STATUS_OK)
         cout << "CAN - ok" << endl;
-    }else{
+    else
         cout << "CAN - fail" << endl;
-    }
-
+    
     
     scpp::CanFrame fr;
     
     while(1){
         
-        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
         std::lock_guard<std::mutex> lock(cout_mutex);
         if(can.read(fr) == scpp::STATUS_OK){
             printf("len %d byte, id: %x, data: %02x %02x %02x %02x %02x %02x %02x %02x  \n", fr.len, fr.id, 
@@ -117,19 +107,16 @@ void processCANMessages(){
             
         }
 
-        
-        //decoder.readProtocolData();
     }
 };
 
 //void sendCANMessages(string source,int postid_s,int boardid_s, string dest,int post_d,int boardid_d,string type,string error,string command,string data){
 void sendCANMessages(){
     while(1){
-        std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
         std::lock_guard<std::mutex> lock(cout_mutex);
-        cout << "Sending data: " << endl;
         if(!txbuf.isEmpty()){
-            cout << "sending ++++++++++++++++++++++" << endl;
+            cout << "sending buffer ++++++++++++++++++++++" << endl;
             cout << "head: "<< txbuf.getHead() << "    tail: "<<txbuf.getTail()<<endl;
 
             TransmitRawMsg txpop;
@@ -137,10 +124,10 @@ void sendCANMessages(){
 
             //shoot to CAN bus
             scpp::CanFrame cf_to_write;   
-            cf_to_write.id = txpop.id | CAN_EFF_FLAG;
+            cf_to_write.id = txpop.getId() | CAN_EFF_FLAG;
             cf_to_write.len = 8;
             for (int i = 0; i < 8; ++i)
-                cf_to_write.data[i] = txpop.data[i];
+                cf_to_write.data[i] = txpop.getData()[i];
             auto write_sc_status = can.write(cf_to_write);
             if (write_sc_status != scpp::STATUS_OK){
                 printf("something went wrong on socket write, error code : %d \n", int32_t(write_sc_status));
@@ -149,11 +136,6 @@ void sendCANMessages(){
             else{
                 printf("Message was written to the socket \n");
             }
-                
-
-
-            
-            //sendme.display();
             cout << "sending ++++++++++++++++++++++" << endl;
         }
         

@@ -267,7 +267,7 @@ public:
 
 
 class TransmitRawMsg {
-public: 
+private: 
     uint32_t id;
     uint8_t data[8];
 public:
@@ -366,6 +366,75 @@ class TxBuffer : public TransmitRawMsg {
 
 
 };
+
+class RxBuffer : public ReceiveRawMsg {
+    private:
+        ReceiveRawMsg buffer[SIZE]; 
+        int head,tail;
+        int size;
+        bool isFull;
+    
+    public:
+        RxBuffer() : head(0), tail(0), isFull(false) {}
+    
+    bool isEmpty(){
+        return (!isFull && (head==tail) );
+
+        }
+
+    bool isFullBuffer() const {
+        return isFull;
+        }
+
+    void push(const ReceiveRawMsg& msg){
+        buffer[tail] = msg;
+        tail = (tail + 1) % size;
+
+        if(isFull){
+            head = (head + 1) % size;
+        }
+
+        isFull = (head == tail);
+    }
+
+    int getHead(){
+        return head;
+    }
+
+    int getTail(){
+        return tail;
+    }
+
+    bool pop(ReceiveRawMsg& msg) {
+        if (isEmpty()) {
+            std::cerr << "Buffer Underflow!" << std::endl;
+            return false;
+        }
+
+        msg = buffer[head];
+        head = (head + 1) % size;
+        isFull = false;
+        return true;
+    }
+
+    void display() {
+        if (isEmpty()) {
+            std::cout << "Buffer is empty." << std::endl;
+            return;
+        }
+        
+        std::cout << "Buffer: ";
+        int i = head;
+        while (i != tail) {
+            //buffer[i].display();
+            i = (i + 1) % size;
+        }
+        std::cout << std::endl;
+    }
+
+
+};
+
 
 class Encoder {
 private:
