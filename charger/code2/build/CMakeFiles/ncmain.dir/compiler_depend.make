@@ -230,7 +230,15 @@ CMakeFiles/ncmain.dir/main.cpp.o: /home/vegaav/150kW_EVCharger/charger/code2/mai
   /usr/include/c++/12/bits/unique_lock.h \
   /usr/include/c++/12/cstring \
   /usr/include/string.h \
-  /usr/include/strings.h
+  /usr/include/strings.h \
+  /usr/include/unistd.h \
+  /usr/include/aarch64-linux-gnu/bits/posix_opt.h \
+  /usr/include/aarch64-linux-gnu/bits/environments.h \
+  /usr/include/aarch64-linux-gnu/bits/confname.h \
+  /usr/include/aarch64-linux-gnu/bits/getopt_posix.h \
+  /usr/include/aarch64-linux-gnu/bits/getopt_core.h \
+  /usr/include/aarch64-linux-gnu/bits/unistd_ext.h \
+  /usr/include/linux/close_range.h
 
 CMakeFiles/ncmain.dir/nodecan.cpp.o: /home/vegaav/150kW_EVCharger/charger/code2/nodecan.cpp \
   /usr/include/stdc-predef.h \
@@ -464,6 +472,10 @@ CMakeFiles/ncmain.dir/nodecan.cpp.o: /home/vegaav/150kW_EVCharger/charger/code2/
   /usr/include/strings.h
 
 
+/usr/include/aarch64-linux-gnu/bits/environments.h:
+
+/usr/include/unistd.h:
+
 /usr/include/c++/12/cstring:
 
 /usr/include/c++/12/bits/unique_lock.h:
@@ -495,6 +507,8 @@ CMakeFiles/ncmain.dir/nodecan.cpp.o: /home/vegaav/150kW_EVCharger/charger/code2/
 /usr/include/string.h:
 
 /usr/include/c++/12/bits/stl_uninitialized.h:
+
+/usr/include/linux/close_range.h:
 
 /usr/include/c++/12/memory:
 
@@ -566,6 +580,8 @@ gen/socketcan_cpp/socketcan_cpp_export.h:
 
 /usr/include/aarch64-linux-gnu/bits/uintn-identity.h:
 
+/usr/include/aarch64-linux-gnu/bits/unistd_ext.h:
+
 /usr/include/aarch64-linux-gnu/bits/byteswap.h:
 
 /usr/include/c++/12/ext/concurrence.h:
@@ -627,6 +643,8 @@ gen/socketcan_cpp/socketcan_cpp_export.h:
 /usr/include/aarch64-linux-gnu/bits/types/sigset_t.h:
 
 /usr/include/c++/12/bits/cxxabi_init_exception.h:
+
+/usr/include/aarch64-linux-gnu/bits/confname.h:
 
 /usr/include/c++/12/clocale:
 
@@ -752,6 +770,8 @@ gen/socketcan_cpp/socketcan_cpp_export.h:
 
 /usr/include/aarch64-linux-gnu/bits/timex.h:
 
+/usr/include/aarch64-linux-gnu/bits/getopt_core.h:
+
 /usr/include/aarch64-linux-gnu/c++/12/bits/cpu_defines.h:
 
 /usr/include/c++/12/bits/alloc_traits.h:
@@ -824,6 +844,8 @@ gen/socketcan_cpp/socketcan_cpp_export.h:
 
 /usr/include/aarch64-linux-gnu/bits/cpu-set.h:
 
+/usr/include/aarch64-linux-gnu/bits/getopt_posix.h:
+
 /usr/include/c++/12/thread:
 
 /usr/include/c++/12/bits/exception_defines.h:
@@ -833,6 +855,8 @@ gen/socketcan_cpp/socketcan_cpp_export.h:
 /usr/include/c++/12/bits/align.h:
 
 /usr/include/aarch64-linux-gnu/bits/types/struct_tm.h:
+
+/usr/include/aarch64-linux-gnu/bits/posix_opt.h:
 
 /usr/include/c++/12/cerrno:
 

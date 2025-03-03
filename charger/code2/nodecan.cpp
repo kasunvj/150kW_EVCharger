@@ -6,9 +6,9 @@ scpp::SocketCan can;
 Encoder encoder;
 Decoder decoder;
 mutex cout_mutex;
-ReceiveRawMsg receiveRawMsg;
-TransmitRawMsg transmitRawMsg;
 TxBuffer txbuf;
+RxBuffer rxbuf;
+ReceiveRawMsg rxmsg;
 
 
 void NetworkControllers :: init() const {
@@ -19,8 +19,8 @@ void PortControllers :: init() const {
     cout << "Port Controller Speaking"<< endl;
 };
 
-void Decoder :: readProtocolData(ReceiveRawMsg msgreadinstance){
-    printf("Decoder : id: %x \n",msgreadinstance.getId());
+void Decoder :: readProtocolData(ReceiveRawMsg& msg){
+    printf("Decoder> : id: %x \n",msg.getId());
 
 };
 
@@ -83,11 +83,14 @@ void initializeDevices(){
     
 };
 
-void processCANMessages(){
+int processCANMessages(){
     if(can.open("can0") == scpp::STATUS_OK)
         cout << "CAN - ok" << endl;
-    else
+    else{
         cout << "CAN - fail" << endl;
+        return -1;
+    }
+        
     
     
     scpp::CanFrame fr;
@@ -101,11 +104,14 @@ void processCANMessages(){
                     fr.data[0], fr.data[1], fr.data[2], fr.data[3],
                     fr.data[4], fr.data[5], fr.data[6], fr.data[7]);
             
-            receiveRawMsg.set(fr);
-            decoder.readProtocolData(receiveRawMsg);
-            printf("Reading id %x data from instance \n",receiveRawMsg.getId());
+            rxmsg.set(fr);
+            rxbuf.push(rxmsg);
+            printf("Reading id %x data from instance \n",rxmsg.getId());
+            emit();
             
         }
+        
+        
 
     }
 };
@@ -117,7 +123,8 @@ void sendCANMessages(){
         std::lock_guard<std::mutex> lock(cout_mutex);
         if(!txbuf.isEmpty()){
             cout << "sending buffer ++++++++++++++++++++++" << endl;
-            cout << "head: "<< txbuf.getHead() << "    tail: "<<txbuf.getTail()<<endl;
+            SetColor(44); cout << "Transmit Buffer  H: "<< txbuf.getHead() << " T: "<<txbuf.getTail(); ResetColor(); cout<<endl;
+            
 
             TransmitRawMsg txpop;
             txbuf.pop(txpop);
@@ -129,6 +136,7 @@ void sendCANMessages(){
             for (int i = 0; i < 8; ++i)
                 cf_to_write.data[i] = txpop.getData()[i];
             auto write_sc_status = can.write(cf_to_write);
+            printf("sent can ID %x\n", cf_to_write.id);
             if (write_sc_status != scpp::STATUS_OK){
                 printf("something went wrong on socket write, error code : %d \n", int32_t(write_sc_status));
                 txbuf.push(txpop);
@@ -136,6 +144,7 @@ void sendCANMessages(){
             else{
                 printf("Message was written to the socket \n");
             }
+            
             cout << "sending ++++++++++++++++++++++" << endl;
         }
         
@@ -188,6 +197,23 @@ Avtivity: send can packet object to the buffer
 void send(Message& msg){
     encoder.writeProtocolData(msg);
 };
+
+void emit(){
+    ReceiveRawMsg rxpop;
+    rxbuf.pop(rxpop);
+    
+    SetColor(42); cout << "Receive Buffer H: " << rxbuf.getHead() << " T: " << rxbuf.getTail();ResetColor();cout << endl;
+    
+    decoder.readProtocolData(rxpop);
+    
+}
+
+void SetColor(int textColor)
+{
+    cout << "\033[" << textColor << "m";
+}
+
+void ResetColor() { cout << "\033[0m"; }
 
 
 

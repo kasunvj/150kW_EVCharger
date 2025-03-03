@@ -1,6 +1,7 @@
 #include<iostream>
 #include "nodecan.hpp"
 #include "socketcan_cpp/socketcan_cpp.h"
+#include <unistd.h>
 using namespace std;
 
 
@@ -21,11 +22,17 @@ int main(){
     cout << "sending msgs...................."<< endl;
     //sending messges
     
-    Message msg1("nc",0,0,"pc",0,0,"request","normal","net_sync","");//00a400
-    Message msg2("nc",0,0,"pc",0,0,"request","normal","net_sync","");
+    Message msg1("nc",0,0,"brd",0,0,"request","normal","net_walkin","");
+    Message msg2("nc",0,0,"pc",0,0,"request","normal","net_sync","");//00 0a 40 00
+
     send(msg1);
-    send(msg1);
-    send(msg2);
+    while(1){
+        usleep(1000000);
+        send(msg2);
+    }
+   
+    
+    
     cout << "sending msgs...................."<< endl;
 
     receiver.join();

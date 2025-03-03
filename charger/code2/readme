@@ -22,3 +22,39 @@ CMakeList.txt
 
 test/socketcan.cpp
     g++ socketcan.cpp -o socketcan -I include -lsocketcan_cpp
+
+---------------------------------------------
+
+send(param1, param2, param3, param4, param5, param6, param7, param8, param9, param10)
+@param1:
+    pc | cc | nc | tmc | esc | brd
+
+@param2:
+    post number
+
+@param3:
+    board number
+
+@param4:
+    pc | cc | nc | tmc | esc | brd
+
+@param5:
+    post number
+
+@param6:
+    board number
+
+@param7: command type
+    request | responce
+
+@param8: error type
+    normal | fault | busy | invalcmd | invaldata
+
+@param9: command
+    set_ota | set_config | set_voltagecurent | get_maxvoltage | 
+    set_portauth | get_portmesurement | set_tmctemp | set_escstate
+    set_maxpower | set_logdata | net_sync | net_walkin
+
+@param10 : data
+
+

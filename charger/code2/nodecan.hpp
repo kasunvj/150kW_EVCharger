@@ -12,6 +12,7 @@
 #include <mutex>
 #include <cstring>
 
+
 #define PROTOCOL_FNAME "nodecan.json"
 #define MAX_DEVICES_PER_POST 5
 #define SIZE 5
@@ -157,6 +158,7 @@ struct CommandName{
     unsigned int set_maxpower =       8;
     unsigned int set_logdata =        9;
     unsigned int net_sync =          10;
+    unsigned int net_walkin =        11;
 
     unsigned int getNumb(string type){
         if(type.compare("set_ota") == 0)
@@ -181,6 +183,8 @@ struct CommandName{
             return set_logdata;
         else if(type.compare("net_sync") == 0) 
             return net_sync;
+        else if(type.compare("net_walkin") == 0) 
+            return net_walkin;
         else
             return 9;
     };
@@ -208,6 +212,8 @@ struct CommandName{
                 return "set_logdata";break;
             case 10:
                 return "net_sync";break;
+            case 11:
+                return "net_walkin";break;
             default:
                 return "Not defined"; break;
         }  
@@ -303,7 +309,7 @@ class TxBuffer : public TransmitRawMsg {
     private:
         TransmitRawMsg buffer[SIZE]; 
         int head,tail;
-        int size;
+        int size = SIZE;
         bool isFull;
     
     public:
@@ -371,7 +377,7 @@ class RxBuffer : public ReceiveRawMsg {
     private:
         ReceiveRawMsg buffer[SIZE]; 
         int head,tail;
-        int size;
+        int size = SIZE;
         bool isFull;
     
     public:
@@ -383,6 +389,7 @@ class RxBuffer : public ReceiveRawMsg {
         }
 
     bool isFullBuffer() const {
+        cout << "buffer full" << endl;
         return isFull;
         }
 
@@ -454,17 +461,22 @@ public:
 
 class Decoder {
 public:
-    void readProtocolData(ReceiveRawMsg msgreadinstance);
+    void readProtocolData(ReceiveRawMsg& msg);
 };
 
 class Listener{};
 class Writer {};
 
+
 //int loadConfig(Document& nodecan);
 void initializeDevices();
-void processCANMessages();
+int processCANMessages();
 void sendCANMessages();
 void send(Message& msg);
+void emit();
+void SetColor(int textColor);
+void ResetColor();
+
 /*
 void sendCANMessages(string source,
                      int postid_s, 

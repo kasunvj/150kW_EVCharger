@@ -232,6 +232,14 @@ CMakeFiles/ncmain.dir/main.cpp.o
  /usr/include/c++/12/cstring
  /usr/include/string.h
  /usr/include/strings.h
+ /usr/include/unistd.h
+ /usr/include/aarch64-linux-gnu/bits/posix_opt.h
+ /usr/include/aarch64-linux-gnu/bits/environments.h
+ /usr/include/aarch64-linux-gnu/bits/confname.h
+ /usr/include/aarch64-linux-gnu/bits/getopt_posix.h
+ /usr/include/aarch64-linux-gnu/bits/getopt_core.h
+ /usr/include/aarch64-linux-gnu/bits/unistd_ext.h
+ /usr/include/linux/close_range.h
 
 CMakeFiles/ncmain.dir/nodecan.cpp.o
  /home/vegaav/150kW_EVCharger/charger/code2/nodecan.cpp
