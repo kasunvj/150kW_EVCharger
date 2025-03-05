@@ -389,6 +389,24 @@
                 }
             },
             "responce":{}
+        },
+        "walkin": {
+            "number":11,
+            "request":{
+                "multiplexor":{
+                    "dtype":"string",
+                    "startbyte":0,
+                    "endbyte":1,
+                    "value":0
+                },
+                "logData":{
+                    "dtype":"string",
+                    "startbyte":1,
+                    "endbyte":8,
+                    "value":0
+                }
+            },
+            "responce":{}
         }
     },
 

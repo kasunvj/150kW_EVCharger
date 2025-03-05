@@ -139,7 +139,8 @@ async function navigatePages() {
         '0x07',
         '0x08',
         '0x09',
-        '0x0a'
+        '0x0a',
+        '0x0b'
       ]);
     
       if (selection === '0x00') {
@@ -175,6 +176,10 @@ async function navigatePages() {
       }else if (selection === '0x0a') {
         str = str + "0a net_sync nc->brd, \n";
         command = canbus.command.net_sync.number;
+      }
+      else if (selection === '0x0b') {
+        str = str + "0b net_sync nc->brd, \n";
+        command = canbus.command.walkin.number;
       }
       
       if (selection === 'Back') {

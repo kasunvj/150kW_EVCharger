@@ -9,10 +9,12 @@ mutex cout_mutex;
 TxBuffer txbuf;
 RxBuffer rxbuf;
 ReceiveRawMsg rxmsg;
+array<std::unique_ptr<Device>, MAX_DEVICES_PER_POST> devices;
 
 
 void NetworkControllers :: init() const {
-    cout << "Network Controller Speaking"<< endl;
+    cout << "Network Controller Checking.."<< endl;
+
 };
     
 void PortControllers :: init() const {
@@ -20,7 +22,59 @@ void PortControllers :: init() const {
 };
 
 void Decoder :: readProtocolData(ReceiveRawMsg& msg){
-    printf("Decoder> : id: %x \n",msg.getId());
+    //printf("Decoder> : id: %x \n",msg.getId());
+
+    union ID readId;
+    union Data readData;
+
+    readId.canId = msg.getId() & 0x1FFFFFFF;
+
+    printf("desBoard : %u\n", readId.bits.desBoard);
+    printf("desPost  : %u\n", readId.bits.desPost);
+    printf("desType  : %u\n", readId.bits.desType);
+    printf("srcBoard : %u\n", readId.bits.srcBoard);
+    printf("srcPost  : %u\n", readId.bits.srcPost);
+    printf("srcType  : %u\n", readId.bits.srcType);
+    printf("cmd      : %u\n", readId.bits.cmd);
+    printf("err      : %u\n", readId.bits.err);
+    printf("cmdType  : %u\n", readId.bits.cmdType);
+    printf("unalloc  : %u\n", readId.bits.unalloc);
+
+    readData.canData = msg.getData64();
+    printf("data1 : %02x\n", readData.bytes[0]);
+    printf("data2 : %02x\n", readData.bytes[1]);
+    printf("data3 : %02x\n", readData.bytes[2]);
+    printf("data4 : %02x\n", readData.bytes[3]);
+    printf("data5 : %02x\n", readData.bytes[4]);
+    printf("data6 : %02x\n", readData.bytes[5]);
+    printf("data7 : %02x\n", readData.bytes[6]);
+    printf("data8 : %02x\n", readData.bytes[7]);
+    
+    switch(readId.bits.cmd){
+        case 11:
+            pritnf( "Checking the device list\n");
+            //check device type
+            if(readId.bits.srcType == 0){
+                if(checkingDevices(0,0,0)){
+                    cout << "Device Existed"<< endl;
+                }
+                else{
+                    cout << "Device Not avilable, create it"<< endl;
+                }
+            }
+            //filter all devices which are in that type from device array
+            //check postID & boardid 
+            //is found pass
+            //if not , create a object
+            //assign portid
+            //push to device array
+            break;
+        default:
+            break;
+    }
+
+
+
 
 };
 
@@ -71,10 +125,11 @@ int Encoder :: writeProtocolData(Message& msg){
 
 
 void initializeDevices(){
-    array<std::unique_ptr<Device>, SIZE> devices;
+    
     int count = 0;
 
     devices[0] = make_unique<NetworkControllers>();
+    
     devices[1] = make_unique<PortControllers>();
     
     for (int i=0; i< 2 ; i++ ) {
@@ -100,7 +155,8 @@ int processCANMessages(){
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
         std::lock_guard<std::mutex> lock(cout_mutex);
         if(can.read(fr) == scpp::STATUS_OK){
-            printf("len %d byte, id: %x, data: %02x %02x %02x %02x %02x %02x %02x %02x  \n", fr.len, fr.id, 
+            fr.id = fr.id & 0x1FFFFFFF; //In SocketCAN, the most significant bit (MSB) in fr.id is set when the CAN ID is an extended 29-bit identifier.
+            printf("len %d byte, id: %x, data: %02x %02x %02x %02x %02x %02x %02x %02x  \n", fr.len, fr.id ,  
                     fr.data[0], fr.data[1], fr.data[2], fr.data[3],
                     fr.data[4], fr.data[5], fr.data[6], fr.data[7]);
             
@@ -155,8 +211,13 @@ void sendCANMessages(){
 
 void ReceiveRawMsg :: set(scpp::CanFrame frame){
     id = frame.id;
+    /*
     for(int i= 0; i< sizeof(data)/sizeof(data[0]); i++){
         data[i] = frame.data[i];
+    }
+    */
+    for (int i = 0; i < 8; i++) {
+        data.bytes[i] = frame.data[i];
     }
 };
 
@@ -164,9 +225,13 @@ unsigned int ReceiveRawMsg :: getId(){
     return id;
 };
 
-unsigned int* ReceiveRawMsg :: getData(){
-    return data;
+uint8_t* ReceiveRawMsg :: getData(){
+    return data.bytes;
 };
+
+uint64_t ReceiveRawMsg :: getData64(){
+    return data.canData;
+}
 
 void Message :: setMessage(string source,
                             int postid_s, 
@@ -205,7 +270,17 @@ void emit(){
     SetColor(42); cout << "Receive Buffer H: " << rxbuf.getHead() << " T: " << rxbuf.getTail();ResetColor();cout << endl;
     
     decoder.readProtocolData(rxpop);
+
     
+}
+
+bool checkingDevices(int type, int postid, int boardid){
+
+    printf("Numebr of devices %d\n",size );
+    for (int i=0; i< sizeof(devices)/sizeof(devices[0]) ; i++){
+        printf("%d\n",devices[i]);
+    }
+    return true;
 }
 
 void SetColor(int textColor)

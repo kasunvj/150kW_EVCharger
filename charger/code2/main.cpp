@@ -23,12 +23,12 @@ int main(){
     //sending messges
     
     Message msg1("nc",0,0,"brd",0,0,"request","normal","net_walkin","");
-    Message msg2("nc",0,0,"pc",0,0,"request","normal","net_sync","");//00 0a 40 00
+    Message msg2("nc",0,0,"brd",0,0,"request","normal","net_sync","");//00 0a 40 00
 
     send(msg1);
     while(1){
-        usleep(1000000);
-        send(msg2);
+        usleep(100000);
+        //send(msg2);
     }
    
     

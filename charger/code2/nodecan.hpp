@@ -14,7 +14,7 @@
 
 
 #define PROTOCOL_FNAME "nodecan.json"
-#define MAX_DEVICES_PER_POST 5
+#define MAX_DEVICES_PER_POST 10
 #define SIZE 5
 
 using namespace std;
@@ -264,11 +264,12 @@ public:
 class ReceiveRawMsg {
 private: 
     unsigned int id;
-    unsigned int data[8];
+    Data data;
 public:
     void set(scpp::CanFrame frame);
     unsigned int getId();
-    unsigned int* getData();
+    uint8_t* getData();
+    uint64_t getData64();
 };
 
 
@@ -290,8 +291,10 @@ class Device {
 public:
     int postId;
     int boardId;
+    int portId;
     virtual void init() const = 0;
     virtual ~Device() = default;
+    
 };
 
 class NetworkControllers : public Device {
@@ -304,6 +307,19 @@ public:
     int voltage;
     void init() const override;
 };
+
+class CabinetControllers : public Device {
+public:
+    int voltage;
+    void init() const override;
+};
+
+class EnvControllers : public Device {
+public:
+    int voltage;
+    void init() const override;
+};
+
 
 class TxBuffer : public TransmitRawMsg {
     private:
@@ -474,6 +490,7 @@ int processCANMessages();
 void sendCANMessages();
 void send(Message& msg);
 void emit();
+bool checkingDevices(int type, int postid, int boardid);
 void SetColor(int textColor);
 void ResetColor();
 
