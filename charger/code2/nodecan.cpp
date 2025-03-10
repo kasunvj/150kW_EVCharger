@@ -1,5 +1,6 @@
 #include "nodecan.hpp"
 
+
 using namespace std; 
 
 scpp::SocketCan can;
@@ -9,20 +10,28 @@ mutex cout_mutex;
 TxBuffer txbuf;
 RxBuffer rxbuf;
 ReceiveRawMsg rxmsg;
-array<std::unique_ptr<Device>, MAX_DEVICES_PER_POST> devices;
+//array<std::unique_ptr<Device>, MAX_SUCH_DEVICES> devices;
+Device devices;
+array<std::unique_ptr<PortControllers>,MAX_SUCH_DEVICES> portControllersArray;
+array<std::unique_ptr<CabinetControllers>,MAX_SUCH_DEVICES> cabinetControllersArray;
+array<std::unique_ptr<NetworkControllers>,MAX_SUCH_DEVICES> networkControllersArray;
+array<std::unique_ptr<ThermalControllers>,MAX_SUCH_DEVICES> thermalControllersArray;
+array<std::unique_ptr<EnvControllers>,MAX_SUCH_DEVICES> envControllersArray;
 
 
-void NetworkControllers :: init() const {
-    cout << "Network Controller Checking.."<< endl;
 
-};
-    
-void PortControllers :: init() const {
-    cout << "Port Controller Speaking"<< endl;
-};
 
-void Decoder :: readProtocolData(ReceiveRawMsg& msg){
+
+int Decoder :: readProtocolData(ReceiveRawMsg& msg){
     //printf("Decoder> : id: %x \n",msg.getId());
+
+    SetColor(92);
+    printf("Devices PC:%u CC:%u NC:%u TMC:%u ESC:%u \n",devices.getCurrentPCs(),
+                                                        devices.getCurrentCCs(),
+                                                        devices.getCurrentNCs(),
+                                                        devices.getCurrentTMCs(),
+                                                        devices.getCurrentESCs());
+    ResetColor();
 
     union ID readId;
     union Data readData;
@@ -49,19 +58,15 @@ void Decoder :: readProtocolData(ReceiveRawMsg& msg){
     printf("data6 : %02x\n", readData.bytes[5]);
     printf("data7 : %02x\n", readData.bytes[6]);
     printf("data8 : %02x\n", readData.bytes[7]);
+
     
     switch(readId.bits.cmd){
         case 11:
-            pritnf( "Checking the device list\n");
+            printf( "Checking the device list\n");
             //check device type
-            if(readId.bits.srcType == 0){
-                if(checkingDevices(0,0,0)){
-                    cout << "Device Existed"<< endl;
-                }
-                else{
-                    cout << "Device Not avilable, create it"<< endl;
-                }
-            }
+            checkingDevices(readId.bits.srcType,readId.bits.srcPost,readId.bits.srcBoard);
+                    
+            
             //filter all devices which are in that type from device array
             //check postID & boardid 
             //is found pass
@@ -73,8 +78,7 @@ void Decoder :: readProtocolData(ReceiveRawMsg& msg){
             break;
     }
 
-
-
+    return 0;
 
 };
 
@@ -128,6 +132,7 @@ void initializeDevices(){
     
     int count = 0;
 
+    /*
     devices[0] = make_unique<NetworkControllers>();
     
     devices[1] = make_unique<PortControllers>();
@@ -135,6 +140,8 @@ void initializeDevices(){
     for (int i=0; i< 2 ; i++ ) {
         devices[i]->init();
     }
+    */
+    
     
 };
 
@@ -175,6 +182,7 @@ int processCANMessages(){
 //void sendCANMessages(string source,int postid_s,int boardid_s, string dest,int post_d,int boardid_d,string type,string error,string command,string data){
 void sendCANMessages(){
     while(1){
+        
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
         std::lock_guard<std::mutex> lock(cout_mutex);
         if(!txbuf.isEmpty()){
@@ -269,19 +277,175 @@ void emit(){
     
     SetColor(42); cout << "Receive Buffer H: " << rxbuf.getHead() << " T: " << rxbuf.getTail();ResetColor();cout << endl;
     
-    decoder.readProtocolData(rxpop);
+    if(decoder.readProtocolData(rxpop) != 0){
+        cout << "Reading fail, May be unaccetable " <<endl;
+    }
 
     
 }
 
-bool checkingDevices(int type, int postid, int boardid){
-
-    printf("Numebr of devices %d\n",size );
-    for (int i=0; i< sizeof(devices)/sizeof(devices[0]) ; i++){
-        printf("%d\n",devices[i]);
-    }
-    return true;
+void trueCheck(){
+    
 }
+
+void checkingDevices(int type, int postid, int boardid){
+    // TODO: bring al these 5 cases to one , Im repeating myself
+    bool isIn = false;
+    int isAt = -1;
+    int currentCount= 0;
+    switch(type){
+        case 0://portcontrollers
+            for (int i=0; i<  portControllersArray.size() ; i++){
+                if(portControllersArray[i]){
+                   if((portControllersArray[i]->getpostId() == postid) && (portControllersArray[i]->getboardId() == boardid)){
+                    isIn = true;
+                    isAt = i;
+                   }
+                } 
+            }
+            
+            if(!isIn){
+                currentCount= devices.getCurrentPCs();
+                if( currentCount < MAX_SUCH_DEVICES){
+                    cout << "Creating portcontrollers at count: "<< currentCount << endl;
+                    portControllersArray[currentCount] =  make_unique<PortControllers>(postid,boardid);
+                    jsonWrite("currentPCs",currentCount);
+                    devices.setCurrentPCs(currentCount + 1);
+                }else{
+                    cout << "Creating portcontrollers : MAX Devices reached" <<endl;
+                }
+                
+            }
+            break;
+
+        case 1://cabinetcontrollers
+            for (int i=0; i<  cabinetControllersArray.size() ; i++){
+                if(cabinetControllersArray[i]){
+                   if((cabinetControllersArray[i]->getpostId() == postid) && (cabinetControllersArray[i]->getboardId() == boardid)){
+                    isIn = true;
+                    isAt = i;
+                   }
+                } 
+            }
+            
+            if(!isIn){
+                currentCount= devices.getCurrentCCs();
+                if( currentCount < MAX_SUCH_DEVICES){
+                    cout << "Creating cabinet at count: "<< currentCount << endl;
+                    cabinetControllersArray[currentCount] =  make_unique<CabinetControllers>(postid,boardid);
+                    jsonWrite("currentCCs",currentCount);
+                    devices.setCurrentCCs(currentCount + 1);
+                }else{
+                    cout << "Creating cabinet : MAX Devices reached" <<endl;
+                }
+                
+            }
+            break;
+        
+        case 2://networkcontrollers
+            for (int i=0; i<  networkControllersArray.size() ; i++){
+                if(networkControllersArray[i]){
+                   if((networkControllersArray[i]->getpostId() == postid) && (networkControllersArray[i]->getboardId() == boardid)){
+                    isIn = true;
+                    isAt = i;
+                   }
+                } 
+            }
+            
+            if(!isIn){
+                currentCount= devices.getCurrentNCs();
+                if( currentCount < MAX_SUCH_DEVICES){
+                    cout << "Creating network controllers at count: "<< currentCount << endl;
+                    networkControllersArray[currentCount] =  make_unique<NetworkControllers>(postid,boardid);
+                    jsonWrite("currentNCs",currentCount);
+                    devices.setCurrentNCs(currentCount + 1);
+                }else{
+                    cout << "Creating network controllers : MAX Devices reached" <<endl;
+                }
+                
+            }
+            break;
+        case 3://thermalcontrollers
+            for (int i=0; i<  thermalControllersArray.size() ; i++){
+                if(thermalControllersArray[i]){
+                   if((thermalControllersArray[i]->getpostId() == postid) && (thermalControllersArray[i]->getboardId() == boardid)){
+                    isIn = true;
+                    isAt = i;
+                   }
+                } 
+            }
+            
+            if(!isIn){
+                currentCount= devices.getCurrentTMCs();
+                if( currentCount < MAX_SUCH_DEVICES){
+                    cout << "Creating network controllers at count: "<< currentCount << endl;
+                    thermalControllersArray[currentCount] =  make_unique<ThermalControllers>(postid,boardid);
+                    jsonWrite("currentTMCs",currentCount);
+                    devices.setCurrentTMCs(currentCount + 1);
+                }else{
+                    cout << "Creating network controllers : MAX Devices reached" <<endl;
+                }
+                
+            }
+            break;
+        case 4://envcontrollers
+            for (int i=0; i<  envControllersArray.size() ; i++){
+                if(envControllersArray[i]){
+                   if((envControllersArray[i]->getpostId() == postid) && (envControllersArray[i]->getboardId() == boardid)){
+                    isIn = true;
+                    isAt = i;
+                   }
+                } 
+            }
+            
+            if(!isIn){
+                currentCount= devices.getCurrentESCs();
+                if( currentCount < MAX_SUCH_DEVICES){
+                    cout << "Creating network controllers at count: "<< currentCount << endl;
+                    envControllersArray[currentCount] =  make_unique<EnvControllers>(postid,boardid);
+                    jsonWrite("currentPCs",currentCount);
+                    devices.setCurrentESCs(currentCount + 1);
+                }else{
+                    cout << "Creating network controllers : MAX Devices reached" <<endl;
+                }
+                
+            }
+            break;
+    }
+    
+}
+
+void jsonWrite(string key,int value){
+    json j;
+    std::ifstream file_in(JSON_OUTPUT_FNAME);
+    if (file_in.is_open()) {
+            file_in >> j;  
+            file_in.close();
+        } else {
+            std::cerr << "Unable to open file for reading\n";
+            return;
+        }
+
+    j[key] = value;  
+    
+    std::ofstream file_out(JSON_OUTPUT_FNAME);
+    if (file_out.is_open()) {
+        file_out << j.dump(4);  // Pretty print JSON with 4 spaces
+        file_out.close();
+    } else {
+        std::cerr << "Unable to open file\n";
+    }
+
+}
+
+int NetworkControllers :: init(){
+    cout << "Network Controller adding.."<< endl;
+    return 0;
+};
+    
+int PortControllers :: init() {
+    return 0;
+};
 
 void SetColor(int textColor)
 {

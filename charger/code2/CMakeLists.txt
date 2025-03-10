@@ -8,6 +8,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 # Add ncmain library
 add_subdirectory(socketcan-cpp)
 
+# Add json library
+#add_subdirectory(json)
+
 # Create ncmain executable
 add_executable(ncmain main.cpp nodecan.cpp)
 

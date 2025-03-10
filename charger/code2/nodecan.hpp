@@ -4,6 +4,8 @@
 #define NODECAN_HPP
 
 #include "socketcan_cpp/socketcan_cpp.h"
+#include "include/json.hpp"
+#include <fstream>
 #include <iostream>
 #include <memory>
 #include <array>
@@ -14,10 +16,12 @@
 
 
 #define PROTOCOL_FNAME "nodecan.json"
-#define MAX_DEVICES_PER_POST 10
-#define SIZE 5
+#define MAX_SUCH_DEVICES 10
+#define TXRX_BUFFER_SIZE 5
+#define JSON_OUTPUT_FNAME "device_list.json"
 
 using namespace std;
+using json = nlohmann::json;
 
 union ID{
     struct{
@@ -289,43 +293,118 @@ public:
 
 class Device {
 public:
-    int postId;
-    int boardId;
-    int portId;
-    virtual void init() const = 0;
-    virtual ~Device() = default;
+    unsigned int currentPCs = 0;
+    unsigned int currentCCs = 0;
+    unsigned int currentNCs = 0;
+    unsigned int currentTMCs = 0;
+    unsigned int currentESCs = 0;
+
+    //virtual int init(){return 0;};
+    //virtual ~Device() = default;
+    unsigned int getCurrentPCs(){return currentPCs;}
+    void setCurrentPCs(unsigned int c){currentPCs = c;}
+    unsigned int getCurrentCCs(){return currentCCs;}
+    void setCurrentCCs(unsigned int c){currentCCs = c;}
+    unsigned int getCurrentNCs(){return currentNCs;}
+    void setCurrentNCs(unsigned int c){currentNCs = c;}
+    unsigned int getCurrentTMCs(){return currentTMCs;}
+    void setCurrentTMCs(unsigned int c){currentTMCs = c;}
+    unsigned int getCurrentESCs(){return currentESCs;}
+    void setCurrentESCs(unsigned int c){currentESCs = c;}
     
 };
 
-class NetworkControllers : public Device {
+
+class PortControllers {
+private:
+    unsigned int postId = 0;
+    unsigned int boardId = 0;
+    
 public:
-    void init() const override;
+    PortControllers(unsigned int pid,unsigned int bid){//post id and board id
+        postId =pid;
+        boardId= bid;
+    }
+    int init();
+    void setpostId(unsigned int x){postId = x;}
+    void setboardId(unsigned int x){boardId = x;}
+    int getpostId(){return postId;}
+    int getboardId(){return boardId;}
+    
+
 };
 
-class PortControllers : public Device {
+class CabinetControllers  {
+private:
+    unsigned int postId = 0;
+    unsigned int boardId = 0;
+    
 public:
-    int voltage;
-    void init() const override;
+    CabinetControllers(unsigned int pid,unsigned int bid){//post id and board id
+        postId =pid;
+        boardId= bid;
+    }
+    int init();
+    void setpostId(unsigned int x){postId = x;}
+    void setboardId(unsigned int x){boardId = x;}
+    int getpostId(){return postId;}
+    int getboardId(){return boardId;}
 };
 
-class CabinetControllers : public Device {
+class NetworkControllers {
+private:
+    unsigned int postId = 0;
+    unsigned int boardId = 0;   
 public:
-    int voltage;
-    void init() const override;
+    NetworkControllers(unsigned int pid,unsigned int bid){//post id and board id
+        postId =pid;
+        boardId= bid;
+    }
+    int init();
+    void setpostId(unsigned int x){postId = x;}
+    void setboardId(unsigned int x){boardId = x;}
+    int getpostId(){return postId;}
+    int getboardId(){return boardId;}
 };
 
-class EnvControllers : public Device {
+class ThermalControllers {
+private:
+    unsigned int postId = 0;
+    unsigned int boardId = 0;   
 public:
-    int voltage;
-    void init() const override;
+    ThermalControllers(unsigned int pid,unsigned int bid){//post id and board id
+        postId =pid;
+        boardId= bid;
+    }
+    int init();
+    void setpostId(unsigned int x){postId = x;}
+    void setboardId(unsigned int x){boardId = x;}
+    int getpostId(){return postId;}
+    int getboardId(){return boardId;}
+};
+
+class EnvControllers {
+private:
+    unsigned int postId = 0;
+    unsigned int boardId = 0;   
+public:
+    EnvControllers(unsigned int pid,unsigned int bid){//post id and board id
+        postId =pid;
+        boardId= bid;
+    }
+    int init();
+    void setpostId(unsigned int x){postId = x;}
+    void setboardId(unsigned int x){boardId = x;}
+    int getpostId(){return postId;}
+    int getboardId(){return boardId;}
 };
 
 
 class TxBuffer : public TransmitRawMsg {
     private:
-        TransmitRawMsg buffer[SIZE]; 
+        TransmitRawMsg buffer[TXRX_BUFFER_SIZE]; 
         int head,tail;
-        int size = SIZE;
+        int size = TXRX_BUFFER_SIZE;
         bool isFull;
     
     public:
@@ -391,9 +470,9 @@ class TxBuffer : public TransmitRawMsg {
 
 class RxBuffer : public ReceiveRawMsg {
     private:
-        ReceiveRawMsg buffer[SIZE]; 
+        ReceiveRawMsg buffer[TXRX_BUFFER_SIZE]; 
         int head,tail;
-        int size = SIZE;
+        int size = TXRX_BUFFER_SIZE;
         bool isFull;
     
     public:
@@ -477,7 +556,7 @@ public:
 
 class Decoder {
 public:
-    void readProtocolData(ReceiveRawMsg& msg);
+    int readProtocolData(ReceiveRawMsg& msg);
 };
 
 class Listener{};
@@ -490,9 +569,10 @@ int processCANMessages();
 void sendCANMessages();
 void send(Message& msg);
 void emit();
-bool checkingDevices(int type, int postid, int boardid);
+void checkingDevices(int type, int postid, int boardid);
 void SetColor(int textColor);
 void ResetColor();
+void jsonWrite(string key, int value);
 
 /*
 void sendCANMessages(string source,
